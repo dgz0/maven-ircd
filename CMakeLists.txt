@@ -107,7 +107,6 @@ add_library(maven-ircd-build-settings-c INTERFACE)
 set(COMPILER_FLAGS_BASE
 	-Waggregate-return
 	-Wall
-	-Walloc-zero
 	-Walloca
 	-Wbad-function-cast
 	-Wcast-align
@@ -116,53 +115,29 @@ set(COMPILER_FLAGS_BASE
 	-Wdate-time
 	-Wdisabled-optimization
 	-Wdouble-promotion
-	-Wduplicated-branches
-	-Wduplicated-cond
 	-Wextra
 	-Wfloat-equal
-	-Wformat-overflow=2
-	-Wformat-signedness
-	-Wformat-truncation=2
 	-Wformat=2
-	-Wimplicit-fallthrough=5
 	-Winit-self
 	-Winline
 	-Winvalid-pch
-	-Wjump-misses-init
-	-Wlogical-op
 	-Wlong-long
 	-Wmissing-include-dirs
-	-Wmissing-profile
 	-Wmissing-prototypes
 	-Wnested-externs
-	-Wno-aggressive-loop-optimizations
 	-Wnull-dereference
 	-Wold-style-definition
-	-Wopenmp-simd
 	-Wpacked
 	-Wpadded
 	-Wpointer-arith
 	-Wredundant-decls
 	-Wshadow
-	-Wshift-overflow=2
 	-Wstrict-prototypes
-	-Wstringop-truncation
-	-Wsuggest-attribute=cold
-	-Wsuggest-attribute=const
-	-Wsuggest-attribute=format
-	-Wsuggest-attribute=malloc
-	-Wsuggest-attribute=noreturn
-	-Wsuggest-attribute=pure
 	-Wswitch-default
 	-Wswitch-enum
-	-Wsync-nand
 	-Wundef
 	-Wuninitialized
-	-Wunsafe-loop-optimizations
-	-Wunsuffixed-float-constants
-	-Wunused-const-variable=2
 	-Wunused-macros
-	-Wvector-operation-performance
 	-Wvla
 	-Wwrite-strings)
 
@@ -173,9 +148,36 @@ if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
 			"gcc >=${GCC_VER_MIN} or clang >=${CLANG_VER_MIN}.")
 	endif()
 
+	set(COMPILER_FLAGS_GCC
+		-Walloc-zero
+		-Wduplicated-branches
+		-Wduplicated-cond
+		-Wformat-overflow=2
+		-Wformat-signedness
+		-Wformat-truncation=2
+		-Wimplicit-fallthrough=5
+		-Wjump-misses-init
+		-Wlogical-op
+		-Wmissing-profile
+		-Wno-aggressive-loop-optimizations
+		-Wopenmp-simd
+		-Wshift-overflow=2
+		-Wstringop-truncation
+		-Wsuggest-attribute=cold
+		-Wsuggest-attribute=const
+		-Wsuggest-attribute=format
+		-Wsuggest-attribute=malloc
+		-Wsuggest-attribute=noreturn
+		-Wsuggest-attribute=pure
+		-Wsync-nand
+		-Wunsafe-loop-optimizations
+		-Wunsuffixed-float-constants
+		-Wunused-const-variable=2
+		-Wvector-operation-performance)
+
 	target_compile_options(
 		maven-ircd-build-settings-c INTERFACE
-		${COMPILER_FLAGS_BASE} "-ggdb3"
+		${COMPILER_FLAGS_BASE} ${COMPILER_FLAGS_GCC} "-ggdb3"
 	)
 elseif (CMAKE_C_COMPILER_ID MATCHES "Clang")
 	if (CMAKE_C_COMPILER_VERSION LESS ${CLANG_VER_MIN})
@@ -183,6 +185,11 @@ elseif (CMAKE_C_COMPILER_ID MATCHES "Clang")
 			"Your clang version is too old; you must use either "
 			"clang >=${CLANG_VER_MIN} or gcc >=${GCC_VER_MIN}.")
 	endif()
+
+	target_compile_options(
+		maven-ircd-build-settings-c INTERFACE
+		${COMPILER_FLAGS_BASE} "-glldb"
+	)
 else()
 	message(FATAL_ERROR
 		"Your C compiler is incompatible with this project; you must "

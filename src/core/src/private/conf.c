@@ -19,8 +19,6 @@
 // SOFTWARE.
 
 #include "util.h"
-#include <string.h>
-
 #include "core/conf.h"
 
 bool irc_conf_listener_add(struct irc_conf *const conf,

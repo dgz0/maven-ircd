@@ -18,6 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#include <ctype.h>
 #include "util.h"
 
 bool str_all_chars(const char *const str, const size_t str_len)

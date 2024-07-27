@@ -24,7 +24,7 @@
 #include "core/conf.h"
 
 bool irc_conf_listener_add(struct irc_conf *const conf,
-			   struct irc_conf_listener *listener,
+			   struct irc_conf_listener *const listener,
 			   const size_t host_str_len)
 {
 	if (conf->listeners.num_entries >= IRC_CONF_LISTENER_NUM_MAX) {

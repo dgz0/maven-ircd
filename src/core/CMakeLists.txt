@@ -18,4 +18,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-add_subdirectory(core)
+add_subdirectory(src)
+
+if (MAVEN_IRCD_BUILD_TESTS)
+        add_subdirectory(tests)
+endif()

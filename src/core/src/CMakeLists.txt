@@ -18,4 +18,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-add_subdirectory(core)
+set(SRCS_PRIVATE private/conf.c private/ctx.c private/util.c)
+set(HDRS_PUBLIC public/core/conf.h public/core/ctx.h)
+
+add_library(core STATIC ${SRCS_PRIVATE} ${HDRS_PUBLIC})
+
+target_include_directories(core PUBLIC public)
+target_link_libraries(core PRIVATE maven-ircd-build-settings-c)

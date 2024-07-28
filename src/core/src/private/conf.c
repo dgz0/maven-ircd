@@ -21,6 +21,12 @@
 #include "util.h"
 #include "core/conf.h"
 
+// clang-format off
+
+#define LISTENER_PORT_NUM_MAX   (65535)
+
+// clang-format on
+
 bool irc_conf_listener_add(struct irc_conf *const conf,
 			   struct irc_conf_listener *const listener,
 			   const size_t host_str_len)
@@ -29,7 +35,15 @@ bool irc_conf_listener_add(struct irc_conf *const conf,
 		return false;
 	}
 
+	if (!is_ipv4(listener->host, host_str_len)) {
+		return false;
+	}
+
 	if (!str_all_chars(listener->host, host_str_len)) {
+		return false;
+	}
+
+	if (listener->port > LISTENER_PORT_NUM_MAX) {
 		return false;
 	}
 

@@ -37,6 +37,13 @@ extern "C" {
 
 // clang-format on
 
+enum irc_conf_retval {
+	/// @brief The maximum number of listeners has been reached.
+	IRC_CONF_LISTENERS_TOO_MANY,
+
+	IRC_CONF_ERR_INVALID_IP_ADDRESS
+};
+
 struct irc_conf_listener {
 	char host[IRC_CONF_LISTENER_HOST_LEN_MAX];
 	uint port;

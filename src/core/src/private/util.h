@@ -24,11 +24,3 @@
 #include <stddef.h>
 
 bool str_all_chars(const char *const str, const size_t str_len);
-
-/// @brief Determines if a given string is an IPv4 address.
-///
-/// @param str The string to check.
-/// @param len The length of the string.
-///
-/// @returns `true` if `str` is an IPv4 address, or `false` otherwise.
-bool is_ipv4(const char *const str, const size_t len);

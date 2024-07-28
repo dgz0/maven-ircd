@@ -57,8 +57,7 @@ struct irc_conf {
 };
 
 bool irc_conf_listener_add(struct irc_conf *conf,
-			   struct irc_conf_listener *listener,
-			   size_t host_str_len);
+			   struct irc_conf_listener *listener);
 
 #ifdef __cplusplus
 }

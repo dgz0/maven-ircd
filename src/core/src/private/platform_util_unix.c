@@ -18,30 +18,32 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "core/conf.h"
+#include <stddef.h>
+
+#include <netdb.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+
 #include "platform_util.h"
 
-// clang-format off
-
-#define LISTENER_PORT_NUM_MAX   (65535)
-
-// clang-format on
-
-bool irc_conf_listener_add(struct irc_conf *const conf,
-			   struct irc_conf_listener *const listener)
+bool platform_ip_addr_valid(const char *const str)
 {
-	if (conf->listeners.num_entries >= IRC_CONF_LISTENER_NUM_MAX) {
+	struct addrinfo hints = {};
+	struct addrinfo *res = NULL;
+
+	hints.ai_family = PF_UNSPEC;
+	hints.ai_flags = AI_NUMERICHOST;
+
+	const int error = getaddrinfo(str, NULL, &hints, &res);
+
+	if (error) {
 		return false;
 	}
 
-	if (!platform_ip_addr_valid(listener->host)) {
-		return false;
+	if ((res->ai_family == AF_INET) || (res->ai_family == AF_INET6)) {
+		freeaddrinfo(res);
+		return true;
 	}
-
-	if (listener->port > LISTENER_PORT_NUM_MAX) {
-		return false;
-	}
-
-	conf->listeners.entries[conf->listeners.num_entries++] = *listener;
-	return true;
+	freeaddrinfo(res);
+	return false;
 }

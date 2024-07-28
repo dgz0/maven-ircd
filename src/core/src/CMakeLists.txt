@@ -18,8 +18,16 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-set(SRCS_PRIVATE private/conf.c private/ctx.c private/util.c)
-set(HDRS_PUBLIC public/core/conf.h public/core/ctx.h)
+set(SRCS_PRIVATE
+	private/conf.c
+	private/ctx.c
+	private/platform_util_unix.c
+	private/util.c)
+
+set(HDRS_PUBLIC
+	public/core/conf.h
+	public/core/ctx.h
+	public/core/types.h)
 
 add_library(core STATIC ${SRCS_PRIVATE} ${HDRS_PUBLIC})
 

@@ -18,30 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "core/conf.h"
-#include "platform_util.h"
+#pragma once
 
-// clang-format off
+#include <stdbool.h>
 
-#define LISTENER_PORT_NUM_MAX   (65535)
-
-// clang-format on
-
-bool irc_conf_listener_add(struct irc_conf *const conf,
-			   struct irc_conf_listener *const listener)
-{
-	if (conf->listeners.num_entries >= IRC_CONF_LISTENER_NUM_MAX) {
-		return false;
-	}
-
-	if (!platform_ip_addr_valid(listener->host)) {
-		return false;
-	}
-
-	if (listener->port > LISTENER_PORT_NUM_MAX) {
-		return false;
-	}
-
-	conf->listeners.entries[conf->listeners.num_entries++] = *listener;
-	return true;
-}
+bool platform_ip_addr_valid(const char *str);

@@ -19,7 +19,9 @@
 // SOFTWARE.
 
 #include "core/conf.h"
-#include "platform_util.h"
+#include <stdlib.h>
+#include <string.h>
+#include <errno.h>
 
 // clang-format off
 
@@ -27,21 +29,20 @@
 
 // clang-format on
 
-bool irc_conf_listener_add(struct irc_conf *const conf,
-			   struct irc_conf_listener *const listener)
+enum irc_conf_retval
+irc_conf_listener_add(struct irc_conf *const conf,
+		      struct irc_conf_listener *const listener)
 {
 	if (conf->listeners.num_entries >= IRC_CONF_LISTENER_NUM_MAX) {
-		return false;
+		return IRC_CONF_LISTENERS_TOO_MANY;
 	}
 
-	if (!platform_ip_addr_valid(listener->host)) {
-		return false;
-	}
+	const long port = strtol(listener->port, NULL, 10);
 
-	if (listener->port > LISTENER_PORT_NUM_MAX) {
-		return false;
+	if ((port > LISTENER_PORT_NUM_MAX) || (errno == ERANGE)) {
+		return IRC_CONF_ERR_INVALID_PORT;
 	}
 
 	conf->listeners.entries[conf->listeners.num_entries++] = *listener;
-	return true;
+	return IRC_CONF_NO_ERROR;
 }

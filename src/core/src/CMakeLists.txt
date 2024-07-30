@@ -21,15 +21,22 @@
 set(SRCS_PRIVATE
 	private/conf.c
 	private/ctx.c
-	private/platform_util_unix.c
-	private/util.c)
+	private/log.c
+	private/net.c
+	private/platform_net_unix.c)
+
+set(HDRS_PRIVATE
+	private/log.h
+	private/net.h
+	private/platform_net.h)
 
 set(HDRS_PUBLIC
 	public/core/conf.h
 	public/core/ctx.h
+	public/core/net.h
 	public/core/types.h)
 
-add_library(core STATIC ${SRCS_PRIVATE} ${HDRS_PUBLIC})
+add_library(core STATIC ${SRCS_PRIVATE} ${HDRS_PRIVATE} ${HDRS_PUBLIC})
 
 target_include_directories(core PUBLIC public)
 target_link_libraries(core PRIVATE maven-ircd-build-settings-c)

@@ -20,6 +20,29 @@
 
 #pragma once
 
-#include <stdbool.h>
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
 
-bool platform_ip_addr_valid(const char *str);
+#include "conf.h"
+#include "log.h"
+
+// clang-format off
+
+#define MAVEN_IRCD_LISTENERS_NUM_MAX    (10)
+
+// clang-format on
+
+struct irc_net {
+	struct {
+		void *entries[MAVEN_IRCD_LISTENERS_NUM_MAX];
+		size_t num_entries;
+	} listeners;
+
+	struct irc_conf *conf;
+	struct irc_log *log;
+};
+
+#ifdef __cplusplus
+}
+#endif // __cplusplus

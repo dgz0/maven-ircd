@@ -35,18 +35,27 @@ extern "C" {
 #define IRC_CONF_LISTENER_NUM_MAX	(10)
 #define IRC_CONF_LISTENER_HOST_LEN_MAX	(32)
 
+#define IRC_CONF_LISTENER_PORT_LEN_MAX	(10)
+
 // clang-format on
 
 enum irc_conf_retval {
+	/// @brief The function completed successfully with no errors.
+	IRC_CONF_NO_ERROR,
+
 	/// @brief The maximum number of listeners has been reached.
 	IRC_CONF_LISTENERS_TOO_MANY,
 
-	IRC_CONF_ERR_INVALID_IP_ADDRESS
+	/// @brief The IP address specified is not properly formatted.
+	IRC_CONF_ERR_INVALID_IP_ADDRESS,
+
+	/// @brief The specified port is invalid.
+	IRC_CONF_ERR_INVALID_PORT
 };
 
 struct irc_conf_listener {
-	char host[IRC_CONF_LISTENER_HOST_LEN_MAX];
-	uint port;
+	char host[IRC_CONF_LISTENER_HOST_LEN_MAX + 1];
+	char port[IRC_CONF_LISTENER_PORT_LEN_MAX + 1];
 };
 
 struct irc_conf {
@@ -56,8 +65,8 @@ struct irc_conf {
 	} listeners;
 };
 
-bool irc_conf_listener_add(struct irc_conf *conf,
-			   struct irc_conf_listener *listener);
+enum irc_conf_retval irc_conf_listener_add(struct irc_conf *conf,
+					   struct irc_conf_listener *listener);
 
 #ifdef __cplusplus
 }

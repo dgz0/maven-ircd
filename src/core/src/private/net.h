@@ -18,11 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "core/ctx.h"
-#include "net.h"
+#pragma once
 
-void irc_init(struct irc_ctx *const ctx)
-{
-	ctx->net.conf = &ctx->conf;
-	net_init(&ctx->net);
-}
+#include "core/net.h"
+
+void net_init(struct irc_net *const net);

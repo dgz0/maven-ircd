@@ -18,11 +18,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "core/ctx.h"
-#include "net.h"
+#pragma once
 
-void irc_init(struct irc_ctx *const ctx)
-{
-	ctx->net.conf = &ctx->conf;
-	net_init(&ctx->net);
-}
+#include <stdbool.h>
+
+#include "core/net.h"
+
+bool platform_net_listen(struct irc_net *net, const char *host,
+			 const char *port);

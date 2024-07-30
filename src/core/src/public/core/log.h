@@ -18,11 +18,33 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "core/ctx.h"
-#include "net.h"
+#pragma once
 
-void irc_init(struct irc_ctx *const ctx)
-{
-	ctx->net.conf = &ctx->conf;
-	net_init(&ctx->net);
+#ifdef __cplusplus
+extern "C" {
+#endif // cplusplus
+
+#include "types.h"
+
+enum irc_log_lvl {
+	IRC_LOG_LVL_INFO,
+	IRC_LOG_LVL_WARN,
+	IRC_LOG_LVL_ERR,
+	IRC_LOG_LVL_DBG,
+	IRC_LOG_LVL_TRACE
+};
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpadded"
+
+struct irc_log {
+	void *udata;
+	void (*cb)(void *udata, const uint lvl, char *str);
+	uint lvl;
+};
+
+#pragma GCC diagnostic pop
+
+#ifdef __cplusplus
 }
+#endif // cplusplus

@@ -25,10 +25,18 @@ extern "C" {
 #endif // __cplusplus
 
 #include "conf.h"
+#include "log.h"
+#include "net.h"
 
 struct irc_ctx {
 	struct irc_conf conf;
+	struct irc_net net;
+	struct irc_log log;
 };
+
+void irc_init(struct irc_ctx *ctx);
+
+void irc_io_loop(struct irc_ctx *ctx);
 
 #ifdef __cplusplus
 }

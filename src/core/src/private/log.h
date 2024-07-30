@@ -18,32 +18,23 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include <stddef.h>
+#pragma once
 
-#include <netdb.h>
-#include <sys/socket.h>
-#include <sys/types.h>
+#include "core/log.h"
 
-#include "platform_util.h"
+void log_dispatch(struct irc_log *log, uint lvl, const char *msg, ...);
 
-bool platform_ip_addr_valid(const char *const str)
-{
-	struct addrinfo hints = {};
-	struct addrinfo *res = NULL;
+#define LOG_MSG(logger, level, args...)                   \
+	({                                                \
+		struct irc_log *log = (logger);           \
+                                                          \
+		if ((log->lvl >= (level)) && log->cb) {   \
+			log_dispatch(log, (level), args); \
+		}                                         \
+	})
 
-	hints.ai_family = PF_UNSPEC;
-	hints.ai_flags = AI_NUMERICHOST;
-
-	const int error = getaddrinfo(str, NULL, &hints, &res);
-
-	if (error) {
-		return false;
-	}
-
-	if ((res->ai_family == AF_INET) || (res->ai_family == AF_INET6)) {
-		freeaddrinfo(res);
-		return true;
-	}
-	freeaddrinfo(res);
-	return false;
-}
+#define LOG_INFO(log, args...) (LOG_MSG((log), IRC_LOG_LVL_INFO, args))
+#define LOG_WARN(log, args...) (LOG_MSG((log), IRC_LOG_LVL_WARN, args))
+#define LOG_ERR(log, args...) (LOG_MSG((log), IRC_LOG_LVL_ERR, args))
+#define LOG_DBG(log, args...) (LOG_MSG((log), IRC_LOG_LVL_DBG, args))
+#define LOG_TRACE(log, args...) (LOG_MSG((log), IRC_LOG_LVL_TRACE, args))

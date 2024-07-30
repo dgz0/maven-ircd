@@ -18,9 +18,36 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#pragma once
+#define LOG_MSG_MAX (512)
 
-#include <stdbool.h>
-#include <stddef.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include <string.h>
+#include "log.h"
 
-bool str_all_chars(const char *const str, const size_t str_len);
+void log_dispatch(struct irc_log *const log, const uint lvl,
+		  const char *const msg, ...)
+{
+	// clang-format off
+	static const struct {
+		const char *const str;
+		size_t len;
+	} lvl_data[] = {
+		[IRC_LOG_LVL_INFO]  = {"[info] ", sizeof("[info] ")},
+		[IRC_LOG_LVL_WARN]  = {"[warn] ", sizeof("[warn] ")},
+		[IRC_LOG_LVL_ERR]   = {"[error] ", sizeof("[error] ")},
+		[IRC_LOG_LVL_DBG]   = {"[debug] ", sizeof("[debug] ")},
+		[IRC_LOG_LVL_TRACE] = {"[trace] ", sizeof("[trace] ")}
+	};
+	// clang-format on
+
+	char str[LOG_MSG_MAX];
+	memcpy(str, lvl_data[lvl].str, lvl_data[lvl].len);
+
+	va_list args;
+	va_start(args, msg);
+	vsprintf(&str[lvl_data[lvl].len - 1], msg, args);
+	va_end(args);
+
+	log->cb(log->udata, lvl, str);
+}

@@ -18,15 +18,22 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include <ctype.h>
-#include "util.h"
+#include "net.h"
+#include "platform_net.h"
 
-bool str_all_chars(const char *const str, const size_t str_len)
+static void listener_setup(struct irc_net *const net)
 {
-	for (size_t i = 0; i < str_len; ++i) {
-		if (!isalpha(str[i])) {
-			return false;
+	for (size_t i = 0; i < net->conf->listeners.num_entries; ++i) {
+		const char *host = net->conf->listeners.entries[i].host;
+		const char *port = net->conf->listeners.entries[i].port;
+
+		if (!platform_net_listen(net, host, port)) {
+			return;
 		}
 	}
-	return true;
+}
+
+void net_init(struct irc_net *const net)
+{
+	listener_setup(net);
 }

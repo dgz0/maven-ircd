@@ -198,4 +198,4 @@ else()
 		"use either clang >=${CLANG_VER_MIN} or gcc >=${GCC_VER_MIN}.")
 endif()
 
-add_subdirectory(src)
+add_subdirectory(core)

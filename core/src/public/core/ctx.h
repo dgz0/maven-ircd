@@ -27,14 +27,19 @@ extern "C" {
 #endif // __cplusplus
 
 #include "conf.h"
+#include "net.h"
 
 struct irc_ctx {
 	struct irc_conf conf;
+	struct irc_log log;
+	struct irc_net net;
 };
 
 /// @brief Initializes an IRC server context.
 /// @param ctx The IRC server context to initialize.
 void irc_init(struct irc_ctx *ctx);
+
+void irc_io_loop(struct irc_ctx *ctx);
 
 #ifdef __cplusplus
 }

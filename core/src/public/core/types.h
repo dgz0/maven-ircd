@@ -29,6 +29,7 @@ extern "C" {
 #include <stdint.h>
 
 typedef unsigned int uint;
+typedef uint32_t u32;
 
 #ifdef __cplusplus
 }

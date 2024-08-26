@@ -20,26 +20,45 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#include <stdio.h>
+
+#include "core/conf.h"
 #include "core/ctx.h"
-#include "log.h"
-#include "net.h"
-#include "net_platform.h"
+#include "core/log.h"
 
-void irc_init(struct irc_ctx *const ctx)
+static void listeners_add(struct irc_ctx *const ctx)
 {
-	ctx->net.conf = &ctx->conf;
-	ctx->net.log = &ctx->log;
+	static const struct irc_conf_listener local_listener = {
+		.host = "localhost", .port = "6667"
+	};
 
-	ctx->conf.log = &ctx->log;
+	enum irc_conf_status_code code;
 
-	LOG_INFO(&ctx->log, "initialized");
+	irc_conf_listener_add(&ctx->conf, &local_listener, &code);
 }
 
-void irc_io_loop(struct irc_ctx *const ctx)
+static void log_msg(void *udata, const uint level, char *const str)
 {
-	net_init(&ctx->net);
+	(void)udata;
+	(void)level;
 
-	for (;;) {
-		net_platform_poll(&ctx->net);
-	}
+	printf("log msg: %s\n", str);
+}
+
+static void ctx_setup(struct irc_ctx *const ctx)
+{
+	ctx->log.cb = &log_msg;
+	ctx->log.lvl = IRC_LOG_LVL_TRACE;
+	ctx->log.udata = ctx;
+
+	irc_init(ctx);
+	listeners_add(ctx);
+}
+
+int main(void)
+{
+	struct irc_ctx ctx = {};
+	ctx_setup(&ctx);
+
+	irc_io_loop(&ctx);
 }

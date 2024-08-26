@@ -27,12 +27,16 @@
 
 // clang-format off
 
-/// @brief This branch is unlikely to be executed; improves compiler
-/// optimization decisions. Ignored when profile-guided optimization is used.
+/// @brief This branch is unlikely to be executed.
+///
+/// Improves compiler optimization decisions; ignored when profile-guided
+/// optimization is used.
 #define unlikely(x)	__builtin_expect(!!(x), 0)
 
-/// @brief This branch is likely to be executed; improves compiler optimization
-/// decisions. Ignored when profile-guided optimization is used.
+/// @brief This branch is likely to be executed.
+///
+/// Improves compiler optimization decisions; ignored when profile-guided
+/// optimization is used.
 #define likely(x)	__builtin_expect(!!(x), 1)
 
 #define ATTRIB_FMT(type, idx, first) __attribute__((format(type, idx, first)))

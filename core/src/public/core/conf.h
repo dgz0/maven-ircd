@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-/// @file conf.h Defines the configuration structure of an IRC server instance.
+/// @file conf.h Defines the configuration structure of an IRC server context.
 
 #pragma once
 
@@ -45,7 +45,7 @@ extern "C" {
 /// @brief The maximum length of a port number.
 #define IRC_CONF_LISTENER_PORT_LEN_MAX  (5)
 
-/// @brief The maximum number of listeners we support.
+/// @brief The maximum number of listeners allowed.
 #define IRC_CONF_LISTENER_NUM_MAX       (16)
 
 // clang-format on
@@ -53,28 +53,58 @@ extern "C" {
 enum irc_conf_status_code {
 	// clang-format off
 
-	IRC_CONF_INVALID_PORT_RANGE	= 0,
-	IRC_CONF_TOO_MANY_LISTENERS	= 1,
-	IRC_CONF_STATUS_OK		= 2
+	/// @brief No errors were encountered in the processing of a
+	/// configuration setter.
+	IRC_CONF_STATUS_OK		= 0,
+
+	/// @brief The desired listener specified a malformed port value.
+	IRC_CONF_INVALID_PORT_RANGE	= 1,
+
+	/// @brief The configuration has exceeded the number of listeners
+	/// allowed.
+	IRC_CONF_TOO_MANY_LISTENERS	= 2,
 
 	// clang-format on
 };
 
 /// @brief Defines the attributes of a listener.
 struct irc_conf_listener {
+	/// @brief The hostname associated with the listener. This can be an
+	/// IPv4 or IPv6 address, or a domain name.
 	char host[IRC_CONF_LISTENER_HOST_LEN_MAX + 1];
+
+	/// @brief The port number associated with the listener.
 	char port[IRC_CONF_LISTENER_PORT_LEN_MAX + 1];
 };
 
+/// @brief Defines the full configuration scheme of an IRC server context.
 struct irc_conf {
+	/// @brief Holds the listener entries.
 	struct {
+		/// @brief The list of listener entries.
 		struct irc_conf_listener entries[IRC_CONF_LISTENER_NUM_MAX];
+
+		/// @brief The number of valid listeners in the @ref entries
+		/// array.
 		size_t num_entries;
 	} listeners;
 
+	/// @brief The IRC context's @ref irc_log instance.
 	struct irc_log *log;
 };
 
+/// @brief Adds a listener for incoming client connections.
+///
+/// @param conf The configuration instance to associate the listener entry with.
+///
+/// @param listener The structure containing the user desired listener
+/// parameters.
+///
+/// @param code The detailed return code. If this function returns `true`, this
+/// will be set to @ref IRC_CONF_STATUS_OK. Otherwise, `code` will indicate an
+/// error condition.
+///
+/// @returns `true` if no errors were encountered, or `false` otherwise.
 [[nodiscard]] bool
 irc_conf_listener_add(struct irc_conf *conf,
 		      const struct irc_conf_listener *listener,

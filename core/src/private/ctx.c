@@ -21,14 +21,37 @@
 // SOFTWARE.
 
 #include "core/ctx.h"
+#include "core/event.h"
 #include "log.h"
 #include "net.h"
 #include "net_platform.h"
 
+static void net_client_recv(void *const ctx, void *const ev_data)
+{
+	struct irc_ctx *m_ctx = (struct irc_ctx *)ctx;
+	struct irc_event_net_data_recv *ev =
+		(struct irc_event_net_data_recv *)ev_data;
+
+	// Parse string here, pass to command handlers.
+}
+
+static void net_client_conn(void *const ctx, void *const ev_data)
+{
+	struct irc_ctx *m_ctx = (struct irc_ctx *)ctx;
+
+	struct irc_event_net_client_conn *ev =
+		(struct irc_event_net_client_conn *)ev_data;
+
+	LOG_INFO(&m_ctx->log, "client connected");
+}
+
 void irc_init(struct irc_ctx *const ctx)
 {
+	ctx->event.ctx = ctx;
+
 	ctx->net.conf = &ctx->conf;
 	ctx->net.log = &ctx->log;
+	ctx->net.event = &ctx->event;
 
 	ctx->conf.log = &ctx->log;
 
@@ -37,6 +60,12 @@ void irc_init(struct irc_ctx *const ctx)
 
 void irc_io_loop(struct irc_ctx *const ctx)
 {
+	irc_event_sub(&ctx->event, IRC_EVENT_TYPE_NET_CLIENT_CONN,
+		      &net_client_conn);
+
+	irc_event_sub(&ctx->event, IRC_EVENT_TYPE_NET_DATA_RECV,
+		      &net_client_recv);
+
 	net_init(&ctx->net);
 
 	for (;;) {

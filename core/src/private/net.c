@@ -20,6 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#include "core/event.h"
 #include <errno.h>
 #include <fcntl.h>
 #include <netdb.h>
@@ -41,7 +42,12 @@ void net_read(struct irc_net *const net, const int fd)
 	if (cnt < 0) {
 		// error
 	}
-	LOG_TRACE(net->log, "received \"%s\" from %d", buf, fd);
+
+	struct irc_event_net_data_recv ev = { .fd = fd,
+					      .data = buf,
+					      .size = (size_t)cnt };
+
+	irc_event_pub(net->event, IRC_EVENT_TYPE_NET_DATA_RECV, &ev);
 }
 
 /// @brief Sets the given socket to be non-blocking.
@@ -174,8 +180,8 @@ void net_accept(struct irc_net *const net, const int fd)
 			       sizeof(sbuf), NI_NUMERICHOST | NI_NUMERICSERV);
 
 	if (sock == 0) {
-		LOG_INFO(net->log, "accepted connection (host=%s, port=%s)",
-			 hbuf, sbuf);
+		struct irc_event_net_client_conn ev = { .fd = user_sock };
+		irc_event_pub(net->event, IRC_EVENT_TYPE_NET_CLIENT_CONN, &ev);
 	}
 }
 

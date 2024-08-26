@@ -43,6 +43,7 @@
 set(SRCS_PRIVATE
 	private/conf.c
 	private/ctx.c
+	private/event.c
 	private/log.c
 	private/net_epoll.c
 	private/net.c)
@@ -56,6 +57,7 @@ set(HDRS_PRIVATE
 set(HDRS_PUBLIC
 	public/core/conf.h
 	public/core/ctx.h
+	public/core/event.h
 	public/core/log.h
 	public/core/net.h
 	public/core/types.h)

@@ -26,6 +26,7 @@
 extern "C" {
 #endif // __cplusplus
 
+#include "event.h"
 #include "conf.h"
 #include "log.h"
 
@@ -37,6 +38,7 @@ struct irc_net {
 
 	struct irc_conf *conf;
 	struct irc_log *log;
+	struct irc_event *event;
 };
 
 #ifdef __cplusplus

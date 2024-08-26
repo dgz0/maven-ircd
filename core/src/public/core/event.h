@@ -26,22 +26,63 @@
 extern "C" {
 #endif // __cplusplus
 
-#include "conf.h"
-#include "event.h"
-#include "net.h"
+#include <stddef.h>
 
-struct irc_ctx {
-	struct irc_conf conf;
-	struct irc_event event;
-	struct irc_log log;
-	struct irc_net net;
+// clang-format off
+
+#define IRC_EVENT_NUM_MAX       (256)
+#define IRC_EVENT_SUB_NUM_MAX   (32)
+
+// clang-format on
+
+typedef void (*irc_event_cb)(void *const, void *const);
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpadded"
+
+struct irc_event_net_data_recv {
+	const char *data;
+	size_t size;
+	int fd;
 };
 
-/// @brief Initializes an IRC server context.
-/// @param ctx The IRC server context to initialize.
-void irc_init(struct irc_ctx *ctx);
+#pragma GCC diagnostic pop
 
-void irc_io_loop(struct irc_ctx *ctx);
+struct irc_event_net_client_conn {
+	int fd;
+};
+
+enum irc_event_type {
+	// clang-format off
+
+        /// @brief Data has been received over the network.
+        IRC_EVENT_TYPE_NET_DATA_RECV    = 0,
+
+        IRC_EVENT_TYPE_NET_CLIENT_CONN  = 1,
+
+	// clang-format on
+};
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpadded"
+
+struct irc_event_data {
+	irc_event_cb sub_cb[IRC_EVENT_SUB_NUM_MAX];
+	enum irc_event_type type;
+	size_t num_subs;
+};
+
+#pragma GCC diagnostic pop
+
+struct irc_event {
+	void *ctx;
+	struct irc_event_data event_list[IRC_EVENT_NUM_MAX];
+	size_t num_events;
+};
+
+void irc_event_pub(struct irc_event *ev, enum irc_event_type type, void *ptr);
+void irc_event_sub(struct irc_event *ev, enum irc_event_type type,
+		   irc_event_cb cb);
 
 #ifdef __cplusplus
 }

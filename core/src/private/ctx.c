@@ -20,11 +20,55 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#include <string.h>
+
 #include "core/ctx.h"
 #include "core/event.h"
 #include "log.h"
 #include "net.h"
 #include "net_platform.h"
+
+// clang-format off
+
+#define IRC_CMD_MAX_ARGS	(4)
+#define IRC_CMD_ARGS_LEN_MAX	(510)
+
+// clang-format on
+
+static int parse_msg(const char *const str, const size_t str_len,
+		     char res[IRC_CMD_MAX_ARGS][IRC_CMD_ARGS_LEN_MAX])
+{
+#define IRC_STRIP_CRLF_LEN (3)
+
+	size_t curr_pos = 0;
+	int num_args = 0;
+
+	for (size_t i = 0; i < str_len; ++i) {
+		switch (str[i]) {
+		case '\r':
+		case '\n':
+			return num_args;
+
+		case ' ':
+			num_args++;
+			curr_pos = 0;
+
+			break;
+
+		case ':':
+			memcpy(&res[num_args][curr_pos], &str[i + 1],
+			       str_len - i - IRC_STRIP_CRLF_LEN);
+			return ++num_args;
+
+		default:
+			res[num_args][curr_pos++] = str[i];
+			break;
+		}
+	}
+	return num_args;
+
+#undef IRC_STRIP_CRLF_POS
+}
 
 static void net_client_recv(void *const ctx, void *const ev_data)
 {
@@ -33,6 +77,8 @@ static void net_client_recv(void *const ctx, void *const ev_data)
 		(struct irc_event_net_data_recv *)ev_data;
 
 	// Parse string here, pass to command handlers.
+	char args[IRC_CMD_MAX_ARGS][IRC_CMD_ARGS_LEN_MAX] = {};
+	parse_msg(ev->data, ev->size, args);
 }
 
 static void net_client_conn(void *const ctx, void *const ev_data)

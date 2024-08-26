@@ -20,18 +20,33 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#include <ctype.h>
 #include <errno.h>
 #include <stdlib.h>
 
 #include "compiler.h"
+#include "log.h"
+
 #include "core/conf.h"
 
 // clang-format off
 
-#define LISTENER_PORT_BASE      (10)
+#define LISTENER_PORT_MIN	(0)
 #define LISTENER_PORT_MAX       (65535)
 
 // clang-format on
+
+static bool to_int(const char *const str, int *const res)
+{
+	for (size_t i = 0; str[i] != '\0'; ++i) {
+		if (!isdigit(str[i])) {
+			return false;
+		}
+		*res *= 10;
+		*res += str[i] - '0';
+	}
+	return true;
+}
 
 [[nodiscard]] bool
 irc_conf_listener_add(struct irc_conf *const conf,
@@ -40,18 +55,36 @@ irc_conf_listener_add(struct irc_conf *const conf,
 {
 	if (unlikely(conf->listeners.num_entries >=
 		     IRC_CONF_LISTENER_NUM_MAX)) {
+		LOG_ERR(conf->log,
+			"unable to add \"%s:%s\" as a listener - too many "
+			"listeners (max %d)",
+			listener->host, listener->port,
+			IRC_CONF_LISTENER_NUM_MAX);
+
 		*code = IRC_CONF_TOO_MANY_LISTENERS;
 		return false;
 	}
 
-	const long port = strtol(listener->port, NULL, LISTENER_PORT_BASE);
+	int port = 0;
+	const bool port_conv_good = to_int(listener->port, &port);
 
-	if (unlikely((port > LISTENER_PORT_MAX) || (errno == ERANGE))) {
+	if (unlikely(((port < LISTENER_PORT_MIN) ||
+		      (port > LISTENER_PORT_MAX)) ||
+		     !port_conv_good)) {
+		LOG_ERR(conf->log,
+			"unable to add \"%s:%s\" as a listener - port not "
+			"valid, valid values are integers between %d and %d",
+			listener->host, listener->port, LISTENER_PORT_MIN,
+			LISTENER_PORT_MAX);
+
 		*code = IRC_CONF_INVALID_PORT_RANGE;
 		return false;
 	}
 
 	conf->listeners.entries[conf->listeners.num_entries++] = *listener;
+
+	LOG_INFO(conf->log, "added \"%s:%s\" as a listener", listener->host,
+		 listener->port);
 
 	*code = IRC_CONF_STATUS_OK;
 	return true;

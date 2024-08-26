@@ -53,7 +53,7 @@ project(maven-ircd
 	VERSION 1.0.0.0
 	DESCRIPTION "Internet Relay Chat daemon (IRCd)"
 	HOMEPAGE_URL "https://github.com/dgz0/maven-ircd"
-	LANGUAGES C)
+	LANGUAGES C CXX)
 
 if (NOT UNIX)
 	message(FATAL_ERROR
@@ -88,6 +88,8 @@ endif()
 # minimum CMake version; see the top of this file for the criterion.
 set(CLANG_VER_MIN "10.0.0")
 set(GCC_VER_MIN "9.4.0")
+
+option(MAVEN_IRCD_BUILD_UNIT_TESTS "Build the unit tests" OFF)
 
 # Create an interface library that stores the compiler flags we want to pass to
 # the compiler call for each target.

@@ -40,10 +40,14 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-set(SRCS_PRIVATE private/conf.c private/ctx.c)
-set(HDRS_PRIVATE private/compiler.h)
+set(SRCS_PRIVATE private/conf.c private/ctx.c private/log.c)
+set(HDRS_PRIVATE private/compiler.h private/log.h)
 
-set(HDRS_PUBLIC public/core/conf.h public/core/ctx.h)
+set(HDRS_PUBLIC
+	public/core/conf.h
+	public/core/ctx.h
+	public/core/log.h
+	public/core/types.h)
 
 # Build the core as a static library.
 #

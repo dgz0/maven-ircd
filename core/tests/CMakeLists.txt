@@ -20,9 +20,25 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-add_subdirectory(src)
+include(GoogleTest)
 
-if (MAVEN_IRCD_BUILD_UNIT_TESTS)
-        enable_testing()
-        add_subdirectory(tests)
-endif()
+function(declare_test TEST_NAME TEST_SRC)
+	add_executable(${TEST_NAME} ${TEST_SRC})
+	target_link_libraries(${TEST_NAME} GTest::gtest_main core)
+	gtest_discover_tests(${TEST_NAME})
+endfunction()
+
+include(FetchContent)
+
+FetchContent_Declare(
+	googletest
+	GIT_REPOSITORY https://github.com/google/googletest.git
+	GIT_TAG main
+)
+
+# For Windows: Prevent overriding the parent project's compiler/linker settings.
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+
+FetchContent_MakeAvailable(googletest)
+
+declare_test(test_core_conf conf.cpp)

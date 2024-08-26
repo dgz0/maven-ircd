@@ -31,6 +31,8 @@ extern "C" {
 #include <stdbool.h>
 #include <stddef.h>
 
+#include "log.h"
+
 // clang-format off
 
 /// @brief The maximum length of a listener's host.
@@ -69,6 +71,8 @@ struct irc_conf {
 		struct irc_conf_listener entries[IRC_CONF_LISTENER_NUM_MAX];
 		size_t num_entries;
 	} listeners;
+
+	struct irc_log *log;
 };
 
 [[nodiscard]] bool

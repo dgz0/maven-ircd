@@ -68,16 +68,14 @@ enum irc_event_type {
 
 struct irc_event_data {
 	irc_event_cb sub_cb[IRC_EVENT_SUB_NUM_MAX];
-	enum irc_event_type type;
 	size_t num_subs;
 };
 
 #pragma GCC diagnostic pop
 
 struct irc_event {
-	void *ctx;
 	struct irc_event_data event_list[IRC_EVENT_NUM_MAX];
-	size_t num_events;
+	void *ctx;
 };
 
 void irc_event_pub(struct irc_event *ev, enum irc_event_type type, void *ptr);

@@ -22,60 +22,27 @@
 
 #include "core/event.h"
 
-static void sub_add_to_ev(struct irc_event_data *const ev_data, irc_event_cb cb)
+void irc_event_pub(struct irc_event *const ev, const enum irc_event_type type,
+		   void *const ptr)
 {
-	if (ev_data->num_subs >= IRC_EVENT_SUB_NUM_MAX) {
-		// error
-	}
-	ev_data->sub_cb[ev_data->num_subs++] = cb;
-}
+	struct irc_event_data *ev_data = &ev->event_list[type];
 
-static void ev_dispatch(struct irc_event_data *const ev_data, void *const ctx,
-			void *const ptr)
-{
 	if (!ev_data->num_subs) {
 		return;
 	}
 
 	for (size_t i = 0; i < ev_data->num_subs; ++i) {
-		ev_data->sub_cb[i](ctx, ptr);
-	}
-}
-
-void irc_event_pub(struct irc_event *const ev, const enum irc_event_type type,
-		   void *const ptr)
-{
-	if (!ev->num_events) {
-		return;
-	}
-
-	for (size_t i = 0; i < ev->num_events; ++i) {
-		struct irc_event_data *data = &ev->event_list[i];
-
-		if (data->type == type) {
-			ev_dispatch(&ev->event_list[i], ev->ctx, ptr);
-		}
+		ev_data->sub_cb[i](ev->ctx, ptr);
 	}
 }
 
 void irc_event_sub(struct irc_event *const ev, const enum irc_event_type type,
 		   irc_event_cb cb)
 {
-	for (size_t i = 0; i < ev->num_events; ++i) {
-		if (ev->event_list[i].type == type) {
-			sub_add_to_ev(&ev->event_list[i], cb);
-			return;
-		}
-	}
+	struct irc_event_data *ev_data = &ev->event_list[type];
 
-	if (ev->num_events >= IRC_EVENT_NUM_MAX) {
+	if (ev_data->num_subs >= IRC_EVENT_SUB_NUM_MAX) {
 		// error
 	}
-
-	ev->event_list[ev->num_events].type = type;
-
-	ev->event_list[ev->num_events].sub_cb[0] = cb;
-	ev->event_list[ev->num_events].num_subs++;
-
-	ev->num_events++;
+	ev_data->sub_cb[ev_data->num_subs++] = cb;
 }

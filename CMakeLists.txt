@@ -89,6 +89,7 @@ endif()
 set(CLANG_VER_MIN "10.0.0")
 set(GCC_VER_MIN "9.4.0")
 
+option(MAVEN_IRCD_ENABLE_SANITIZERS "Build with ASAN and UBSan" OFF)
 option(MAVEN_IRCD_BUILD_UNIT_TESTS "Build the unit tests" OFF)
 
 # Create an interface library that stores the compiler flags we want to pass to
@@ -99,6 +100,7 @@ option(MAVEN_IRCD_BUILD_UNIT_TESTS "Build the unit tests" OFF)
 # are specified, it is not included as a target in the generated build system.
 # However, it can have properties set to it, and can be installed and exported.
 add_library(maven-ircd-build-settings-c INTERFACE)
+add_library(maven-ircd-build-settings-cpp INTERFACE)
 
 # These compiler flags are supported by both clang and gcc, and are used
 # regardless of the desired build type. Of course, we can't formally verify that
@@ -144,6 +146,19 @@ set(COMPILER_FLAGS_BASE
 	-Wunused-macros
 	-Wvla
 	-Wwrite-strings)
+
+if (MAVEN_IRCD_ENABLE_SANITIZERS)
+	list(APPEND COMPILER_FLAGS_BASE -fsanitize=address,undefined)
+	target_link_options(
+		maven-ircd-build-settings-c INTERFACE
+		-fsanitize=address,undefined
+	)
+
+	target_link_options(
+		maven-ircd-build-settings-cpp INTERFACE
+		-fsanitize=address,undefined
+	)
+endif()
 
 if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
 	if (CMAKE_C_COMPILER_VERSION LESS ${GCC_VER_MIN})

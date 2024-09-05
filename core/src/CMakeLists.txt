@@ -44,12 +44,14 @@ set(SRCS_PRIVATE
 	private/conf.c
 	private/ctx.c
 	private/event.c
+	private/irc_parse.c
 	private/log.c
 	private/net_epoll.c
 	private/net.c)
 
 set(HDRS_PRIVATE
 	private/compiler.h
+	private/irc_parse.h
 	private/log.h
 	private/net_platform.h
 	private/net.h)

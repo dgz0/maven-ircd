@@ -20,59 +20,56 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "core/ctx.h"
-#include "core/event.h"
+#include <string.h>
 #include "irc_parse.h"
-#include "log.h"
-#include "net.h"
-#include "net_platform.h"
 
-static void net_client_recv(void *const ctx, void *const ev_data)
+static void parse_cmd(struct irc_parser *const ctx, const char c,
+		      struct irc_msg *const msg)
 {
-	struct irc_ctx *m_ctx = (struct irc_ctx *)ctx;
-	struct irc_event_net_data_recv *ev =
-		(struct irc_event_net_data_recv *)ev_data;
-
-	struct irc_msg msg = {};
-	struct irc_parser parser = {};
-
-	parse_msg(&parser, ev->data, ev->size, &msg);
-}
-
-static void net_client_conn(void *const ctx, void *const ev_data)
-{
-	struct irc_ctx *m_ctx = (struct irc_ctx *)ctx;
-
-	struct irc_event_net_client_conn *ev =
-		(struct irc_event_net_client_conn *)ev_data;
-
-	LOG_INFO(&m_ctx->log, "client connected");
-}
-
-void irc_init(struct irc_ctx *const ctx)
-{
-	ctx->event.ctx = ctx;
-
-	ctx->net.conf = &ctx->conf;
-	ctx->net.log = &ctx->log;
-	ctx->net.event = &ctx->event;
-
-	ctx->conf.log = &ctx->log;
-
-	LOG_INFO(&ctx->log, "initialized");
-}
-
-void irc_io_loop(struct irc_ctx *const ctx)
-{
-	irc_event_sub(&ctx->event, IRC_EVENT_TYPE_NET_CLIENT_CONN,
-		      &net_client_conn);
-
-	irc_event_sub(&ctx->event, IRC_EVENT_TYPE_NET_DATA_RECV,
-		      &net_client_recv);
-
-	net_init(&ctx->net);
-
-	for (;;) {
-		net_platform_poll(&ctx->net);
+	if (c == ' ') {
+		msg->num_args++;
+		ctx->curr_pos = 0;
+		ctx->cmd_seen = true;
+	} else {
+		msg->cmd[ctx->curr_pos++] = c;
 	}
+}
+
+static bool parse_arg(struct irc_parser *const ctx, const char c,
+		      struct irc_msg *const msg)
+{
+	switch (c) {
+	case ' ':
+		msg->num_args++;
+		ctx->curr_pos = 0;
+
+		return false;
+
+	case ':':
+		return true;
+
+	default:
+		msg->args[msg->num_args - 1][ctx->curr_pos++] = c;
+		return false;
+	}
+}
+
+void parse_msg(struct irc_parser *const ctx, const char *const str,
+	       const size_t str_len, struct irc_msg *const msg)
+{
+#define CRLF_LEN (2)
+
+	const size_t len = str_len - CRLF_LEN;
+
+	for (size_t pos = 0; pos < len; ++pos) {
+		if (!ctx->cmd_seen) {
+			parse_cmd(ctx, str[pos], msg);
+		} else if (parse_arg(ctx, str[pos], msg)) {
+			memcpy(&msg->args[msg->num_args - 1][ctx->curr_pos],
+			       &str[pos + 1], str_len - pos - CRLF_LEN);
+			return;
+		}
+	}
+
+#undef CRLF_LEN
 }

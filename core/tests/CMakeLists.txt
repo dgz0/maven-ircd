@@ -24,7 +24,13 @@ include(GoogleTest)
 
 function(declare_test TEST_NAME TEST_SRC)
 	add_executable(${TEST_NAME} ${TEST_SRC})
-	target_link_libraries(${TEST_NAME} GTest::gtest_main core)
+
+	target_link_libraries(
+		${TEST_NAME}
+		maven-ircd-build-settings-cpp
+		GTest::gtest_main
+		core)
+
 	gtest_discover_tests(${TEST_NAME})
 endfunction()
 

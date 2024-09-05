@@ -176,13 +176,16 @@ void net_accept(struct irc_net *const net, const int fd)
 	set_sock_nonblock(fd);
 	net_platform_client_add(net, user_sock);
 
+	struct irc_event_net_client_conn ev = { .fd = user_sock };
+	irc_event_pub(net->event, IRC_EVENT_TYPE_NET_CLIENT_CONN, &ev);
+
+#if 0
 	int sock = getnameinfo(&user_in, socklen, hbuf, sizeof(hbuf), sbuf,
 			       sizeof(sbuf), NI_NUMERICHOST | NI_NUMERICSERV);
 
 	if (sock == 0) {
-		struct irc_event_net_client_conn ev = { .fd = user_sock };
-		irc_event_pub(net->event, IRC_EVENT_TYPE_NET_CLIENT_CONN, &ev);
 	}
+#endif
 }
 
 void net_init(struct irc_net *const net)

@@ -20,11 +20,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include <gtest/gtest.h>
+#include <setjmp.h>
+#include <stdarg.h>
+#include <stddef.h>
+#include "cmocka.h"
 #include "core/conf.h"
 
-TEST(CoreConfiguration, AcceptsNormalPortNumber)
+static void accept_normal_port_num(void **state)
 {
+	(void)state;
+
 	struct irc_conf conf = {};
 
 	enum irc_conf_status_code code;
@@ -35,12 +40,14 @@ TEST(CoreConfiguration, AcceptsNormalPortNumber)
 
 	const bool valid = irc_conf_listener_add(&conf, &listener, &code);
 
-	ASSERT_TRUE(valid);
-	ASSERT_EQ(code, IRC_CONF_STATUS_OK);
+	assert_true(valid);
+	assert_int_equal(code, IRC_CONF_STATUS_OK);
 }
 
-TEST(CoreConfiguration, RejectsTooLargePort)
+static void reject_too_large_port(void **state)
 {
+	(void)state;
+
 	struct irc_conf conf = {};
 
 	enum irc_conf_status_code code;
@@ -51,12 +58,14 @@ TEST(CoreConfiguration, RejectsTooLargePort)
 
 	const bool valid = irc_conf_listener_add(&conf, &listener, &code);
 
-	ASSERT_FALSE(valid);
-	ASSERT_EQ(code, IRC_CONF_INVALID_PORT_RANGE);
+	assert_false(valid);
+	assert_int_equal(code, IRC_CONF_INVALID_PORT_RANGE);
 }
 
-TEST(CoreConfiguration, RejectsNegativePortNumbers)
+static void reject_neg_port_num(void **state)
 {
+	(void)state;
+
 	struct irc_conf conf = {};
 
 	enum irc_conf_status_code code;
@@ -67,12 +76,14 @@ TEST(CoreConfiguration, RejectsNegativePortNumbers)
 
 	const bool valid = irc_conf_listener_add(&conf, &listener, &code);
 
-	ASSERT_FALSE(valid);
-	ASSERT_EQ(code, IRC_CONF_INVALID_PORT_RANGE);
+	assert_false(valid);
+	assert_int_equal(code, IRC_CONF_INVALID_PORT_RANGE);
 }
 
-TEST(CoreConfiguration, RejectsAlphaCharsPort)
+static void reject_alpha_port(void **state)
 {
+	(void)state;
+
 	struct irc_conf conf = {};
 
 	enum irc_conf_status_code code;
@@ -83,12 +94,14 @@ TEST(CoreConfiguration, RejectsAlphaCharsPort)
 
 	const bool valid = irc_conf_listener_add(&conf, &listener, &code);
 
-	ASSERT_FALSE(valid);
-	ASSERT_EQ(code, IRC_CONF_INVALID_PORT_RANGE);
+	assert_false(valid);
+	assert_int_equal(code, IRC_CONF_INVALID_PORT_RANGE);
 }
 
-TEST(CoreConfiguration, RejectsMixedWhitespaceAlphaPort)
+static void reject_mixed_whitespace_alpha_port(void **state)
 {
+	(void)state;
+
 	struct irc_conf conf = {};
 
 	enum irc_conf_status_code code;
@@ -99,12 +112,14 @@ TEST(CoreConfiguration, RejectsMixedWhitespaceAlphaPort)
 
 	const bool valid = irc_conf_listener_add(&conf, &listener, &code);
 
-	ASSERT_FALSE(valid);
-	ASSERT_EQ(code, IRC_CONF_INVALID_PORT_RANGE);
+	assert_false(valid);
+	assert_int_equal(code, IRC_CONF_INVALID_PORT_RANGE);
 }
 
-TEST(CoreConfiguration, RejectsAllWhitespacePort)
+static void reject_all_whitespace_port(void **state)
 {
+	(void)state;
+
 	struct irc_conf conf = {};
 
 	enum irc_conf_status_code code;
@@ -115,6 +130,19 @@ TEST(CoreConfiguration, RejectsAllWhitespacePort)
 
 	const bool valid = irc_conf_listener_add(&conf, &listener, &code);
 
-	ASSERT_FALSE(valid);
-	ASSERT_EQ(code, IRC_CONF_INVALID_PORT_RANGE);
+	assert_false(valid);
+	assert_int_equal(code, IRC_CONF_INVALID_PORT_RANGE);
+}
+
+int main(void)
+{
+	static const struct CMUnitTest tests[] = {
+		[0] = cmocka_unit_test(accept_normal_port_num),
+		[1] = cmocka_unit_test(reject_too_large_port),
+		[2] = cmocka_unit_test(reject_neg_port_num),
+		[3] = cmocka_unit_test(reject_alpha_port),
+		[4] = cmocka_unit_test(reject_mixed_whitespace_alpha_port),
+		[5] = cmocka_unit_test(reject_all_whitespace_port)
+	};
+	return cmocka_run_group_tests(tests, NULL, NULL);
 }

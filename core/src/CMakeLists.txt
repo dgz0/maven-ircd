@@ -40,38 +40,46 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-set(SRCS_PRIVATE
-	private/conf.c
-	private/ctx.c
-	private/event.c
-	private/irc_parse.c
-	private/log.c
-	private/net_epoll.c
-	private/net.c)
+set(SRCS
+	conf.c
+	ctx.c
+	event.c
+	irc_parse.c
+	log.c
+	net_epoll.c
+	net.c)
 
 set(HDRS_PRIVATE
-	private/compiler.h
-	private/irc_parse.h
-	private/log.h
-	private/net_platform.h
-	private/net.h)
+	include/private/core_private/compiler.h
+	include/private/core_private/irc_parse.h
+	include/private/core_private/log.h
+	include/private/core_private/net_platform.h
+	include/private/core_private/net.h)
 
 set(HDRS_PUBLIC
-	public/core/conf.h
-	public/core/ctx.h
-	public/core/event.h
-	public/core/log.h
-	public/core/net.h
-	public/core/types.h)
+	include/public/core/conf.h
+	include/public/core/ctx.h
+	include/public/core/event.h
+	include/public/core/log.h
+	include/public/core/net.h
+	include/public/core/types.h)
 
 # Build the core as a static library.
 #
 # NOTE: The core should never be built as a shared library; please don't do
 # this.
-add_library(core STATIC ${SRCS_PRIVATE} ${HDRS_PRIVATE} ${HDRS_PUBLIC})
+add_library(core STATIC ${SRCS} ${HDRS_PRIVATE} ${HDRS_PUBLIC})
 
 # Expose the public header files to targets that link to us.
-target_include_directories(core PUBLIC public)
+target_include_directories(core PUBLIC include/public)
+
+# Expose the private header files to targets that link to us if unit testing is
+# enabled.
+if (MAVEN_IRCD_BUILD_UNIT_TESTS)
+	target_include_directories(core PUBLIC include/private)
+else()
+	target_include_directories(core PRIVATE include/private)
+endif()
 
 # Make sure the core is compiled with the project wide C build settings.
 target_link_libraries(core PRIVATE maven-ircd-build-settings-c)

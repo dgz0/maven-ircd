@@ -20,31 +20,28 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-include(GoogleTest)
-
 function(declare_test TEST_NAME TEST_SRC)
 	add_executable(${TEST_NAME} ${TEST_SRC})
 
 	target_link_libraries(
 		${TEST_NAME}
-		maven-ircd-build-settings-cpp
-		GTest::gtest_main
+		maven-ircd-build-settings-c
+		cmocka::cmocka
 		core)
-
-	gtest_discover_tests(${TEST_NAME})
 endfunction()
 
 include(FetchContent)
 
 FetchContent_Declare(
-	googletest
-	GIT_REPOSITORY https://github.com/google/googletest.git
-	GIT_TAG main
+	cmocka
+	GIT_REPOSITORY https://gitlab.com/cmocka/cmocka.git
+	GIT_TAG cmocka-1.1.7
 )
 
-# For Windows: Prevent overriding the parent project's compiler/linker settings.
-set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+set(UNIT_TESTING OFF CACHE BOOL "" FORCE)
+set(WITH_EXAMPLES OFF CACHE BOOL "" FORCE)
 
-FetchContent_MakeAvailable(googletest)
+FetchContent_MakeAvailable(cmocka)
 
-declare_test(test_core_conf conf.cpp)
+declare_test(test_core_conf core_test_conf.c)
+declare_test(test_core_irc_parse core_test_irc_parse.c)

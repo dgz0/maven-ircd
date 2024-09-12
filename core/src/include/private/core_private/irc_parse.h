@@ -28,7 +28,7 @@
 // clang-format off
 
 #define IRC_MSG_CMD_LEN_MAX	(16)
-#define IRC_MSG_PARAM_LEN_MAX	(32)
+#define IRC_MSG_PARAM_LEN_MAX	(256)
 #define IRC_MSG_PARAM_NUM_MAX	(10)
 
 // clang-format on
@@ -45,5 +45,5 @@ struct irc_msg {
 	size_t cmd_len;
 };
 
-void parse_msg(const char *const str, const size_t str_len,
-	       struct irc_msg *msg);
+void irc_msg_parse(const char *const str, const size_t str_len,
+		   struct irc_msg *msg);

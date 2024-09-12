@@ -20,12 +20,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#include "core_private/irc_parse.h"
+#include "core_private/log.h"
+#include "core_private/net.h"
+#include "core_private/net_platform.h"
+
 #include "core/ctx.h"
-#include "core/event.h"
-#include "irc_parse.h"
-#include "log.h"
-#include "net.h"
-#include "net_platform.h"
 
 static void net_client_recv(void *const ctx, void *const ev_data)
 {
@@ -34,7 +34,7 @@ static void net_client_recv(void *const ctx, void *const ev_data)
 		(struct irc_event_net_data_recv *)ev_data;
 
 	struct irc_msg msg = {};
-	parse_msg(ev->data, ev->size, &msg);
+	irc_msg_parse(ev->data, ev->size, &msg);
 }
 
 static void net_client_conn(void *const ctx, void *const ev_data)

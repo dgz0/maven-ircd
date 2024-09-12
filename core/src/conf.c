@@ -21,11 +21,10 @@
 // SOFTWARE.
 
 #include <ctype.h>
-#include <errno.h>
 #include <stdlib.h>
 
-#include "compiler.h"
-#include "log.h"
+#include "core_private/compiler.h"
+#include "core_private/log.h"
 
 #include "core/conf.h"
 

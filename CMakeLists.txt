@@ -53,7 +53,7 @@ project(maven-ircd
 	VERSION 1.0.0.0
 	DESCRIPTION "Internet Relay Chat daemon (IRCd)"
 	HOMEPAGE_URL "https://github.com/dgz0/maven-ircd"
-	LANGUAGES C CXX)
+	LANGUAGES C)
 
 if (NOT UNIX)
 	message(FATAL_ERROR
@@ -151,11 +151,6 @@ if (MAVEN_IRCD_ENABLE_SANITIZERS)
 	list(APPEND COMPILER_FLAGS_BASE -fsanitize=address,undefined)
 	target_link_options(
 		maven-ircd-build-settings-c INTERFACE
-		-fsanitize=address,undefined
-	)
-
-	target_link_options(
-		maven-ircd-build-settings-cpp INTERFACE
 		-fsanitize=address,undefined
 	)
 endif()

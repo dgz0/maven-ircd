@@ -21,7 +21,7 @@
 // SOFTWARE.
 
 #include <string.h>
-#include "irc_parse.h"
+#include "core_private/irc_parse.h"
 
 static void process_cmd(const char *const str, ptrdiff_t len,
 			struct irc_msg *const msg)
@@ -57,8 +57,8 @@ static void process_word(const char *const str, const ptrdiff_t word_len,
 	}
 }
 
-void parse_msg(const char *const str, const size_t str_len,
-	       struct irc_msg *const msg)
+void irc_msg_parse(const char *const str, const size_t str_len,
+		   struct irc_msg *const msg)
 {
 	const size_t len = str_len - (sizeof("\r\n") - 1);
 

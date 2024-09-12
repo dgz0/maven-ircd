@@ -28,10 +28,10 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-#include "compiler.h"
-#include "log.h"
-#include "net_platform.h"
-#include "net.h"
+#include "core_private/compiler.h"
+#include "core_private/log.h"
+#include "core_private/net_platform.h"
+#include "core_private/net.h"
 
 void net_read(struct irc_net *const net, const int fd)
 {

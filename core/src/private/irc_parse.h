@@ -27,22 +27,23 @@
 
 // clang-format off
 
-#define IRC_CMD_LEN_MAX		(20)
-#define IRC_CMD_ARGS_MAX	(4)
-#define IRC_CMD_ARGS_LEN_MAX	(510)
+#define IRC_MSG_CMD_LEN_MAX	(16)
+#define IRC_MSG_PARAM_LEN_MAX	(32)
+#define IRC_MSG_PARAM_NUM_MAX	(10)
 
 // clang-format on
 
-struct irc_parser {
-	size_t curr_pos;
-	bool cmd_seen;
+struct irc_param {
+	char entry[IRC_MSG_PARAM_LEN_MAX + 1];
+	size_t entry_len;
 };
 
 struct irc_msg {
-	char args[IRC_CMD_ARGS_MAX][IRC_CMD_ARGS_LEN_MAX];
-	size_t num_args;
-	char cmd[IRC_CMD_LEN_MAX];
+	char cmd[IRC_MSG_CMD_LEN_MAX + 1];
+	struct irc_param params[IRC_MSG_PARAM_NUM_MAX];
+	size_t num_params;
+	size_t cmd_len;
 };
 
-void parse_msg(struct irc_parser *ctx, const char *const str,
-	       const size_t str_len, struct irc_msg *msg);
+void parse_msg(const char *const str, const size_t str_len,
+	       struct irc_msg *msg);

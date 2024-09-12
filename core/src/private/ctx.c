@@ -34,9 +34,7 @@ static void net_client_recv(void *const ctx, void *const ev_data)
 		(struct irc_event_net_data_recv *)ev_data;
 
 	struct irc_msg msg = {};
-	struct irc_parser parser = {};
-
-	parse_msg(&parser, ev->data, ev->size, &msg);
+	parse_msg(ev->data, ev->size, &msg);
 }
 
 static void net_client_conn(void *const ctx, void *const ev_data)

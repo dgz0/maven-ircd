@@ -23,53 +23,70 @@
 #include <string.h>
 #include "irc_parse.h"
 
-static void parse_cmd(struct irc_parser *const ctx, const char c,
-		      struct irc_msg *const msg)
+static void process_cmd(const char *const str, ptrdiff_t len,
+			struct irc_msg *const msg)
 {
-	if (c == ' ') {
-		msg->num_args++;
-		ctx->curr_pos = 0;
-		ctx->cmd_seen = true;
+	if (len >= IRC_MSG_CMD_LEN_MAX) {
+		len = IRC_MSG_CMD_LEN_MAX;
+	}
+	memcpy(msg->cmd, str, (size_t)len);
+	msg->cmd_len = (size_t)len;
+}
+
+static void process_param(const char *const str, ptrdiff_t len,
+			  struct irc_msg *const msg)
+{
+	if (msg->num_params >= IRC_MSG_PARAM_NUM_MAX) {
+		return;
+	}
+
+	if (len >= IRC_MSG_PARAM_LEN_MAX) {
+		len = IRC_MSG_PARAM_LEN_MAX;
+	}
+	msg->params[msg->num_params].entry_len = (size_t)len;
+	memcpy(&msg->params[msg->num_params++], str, (size_t)len);
+}
+
+static void process_word(const char *const str, const ptrdiff_t word_len,
+			 struct irc_msg *const msg)
+{
+	if (!msg->cmd_len) {
+		process_cmd(str, word_len, msg);
 	} else {
-		msg->cmd[ctx->curr_pos++] = c;
+		process_param(str, word_len, msg);
 	}
 }
 
-static bool parse_arg(struct irc_parser *const ctx, const char c,
-		      struct irc_msg *const msg)
+void parse_msg(const char *const str, const size_t str_len,
+	       struct irc_msg *const msg)
 {
-	switch (c) {
-	case ' ':
-		msg->num_args++;
-		ctx->curr_pos = 0;
+	const size_t len = str_len - (sizeof("\r\n") - 1);
 
-		return false;
+	for (size_t pos = 0; pos < len;) {
+		const size_t off = len - pos;
 
-	case ':':
-		return true;
+		if ((str[pos] == ':') && (str[pos + 1] != '\r')) {
+			process_param(&str[pos + 1], (ptrdiff_t)off - 1, msg);
+			break;
+		}
 
-	default:
-		msg->args[msg->num_args - 1][ctx->curr_pos++] = c;
-		return false;
-	}
-}
+		// Since we're starting from the left, it's very likely we'll
+		// encounter a space first.
+		const char *token = memchr(&str[pos], ' ', off);
 
-void parse_msg(struct irc_parser *const ctx, const char *const str,
-	       const size_t str_len, struct irc_msg *const msg)
-{
-#define CRLF_LEN (2)
+		if (token) {
+			const ptrdiff_t word_len = token - &str[pos];
+			process_word(&str[pos], word_len, msg);
 
-	const size_t len = str_len - CRLF_LEN;
-
-	for (size_t pos = 0; pos < len; ++pos) {
-		if (!ctx->cmd_seen) {
-			parse_cmd(ctx, str[pos], msg);
-		} else if (parse_arg(ctx, str[pos], msg)) {
-			memcpy(&msg->args[msg->num_args - 1][ctx->curr_pos],
-			       &str[pos + 1], str_len - pos - CRLF_LEN);
-			return;
+			pos += ((size_t)word_len + 1);
+		} else {
+			// No whitespace left. This can mean a few things:
+			//
+			// a) Only a command was sent.
+			// b) We're at the last parameter that is not prefixed
+			//    with a ":".
+			process_word(&str[pos], (ptrdiff_t)off, msg);
+			break;
 		}
 	}
-
-#undef CRLF_LEN
 }

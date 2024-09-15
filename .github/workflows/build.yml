@@ -1,0 +1,52 @@
+name: Build project
+on: push
+jobs:
+    build:
+        name: Build with clang and gcc
+        runs-on: ubuntu-20.04
+
+        steps:
+            - name: Install dependencies
+              uses: awalsh128/cache-apt-pkgs-action@latest
+              with:
+                  packages: clang cmake build-essential ninja-build
+                  version: 1.0
+
+            - name: Clone repository
+              uses: actions/checkout@v4
+
+            - name: Build debug version with clang
+              uses: threeal/cmake-action@v2.0.0
+              with:
+                  build-dir: build-clang-debug
+                  generator: Ninja
+                  options: CMAKE_BUILD_TYPE=Debug
+                  c-compiler: clang
+                  cxx-compiler: clang++
+
+            - name: Build release version with clang
+              uses: threeal/cmake-action@v2.0.0
+              with:
+                  build-dir: build-clang-release
+                  generator: Ninja
+                  options: CMAKE_BUILD_TYPE=Release
+                  c-compiler: clang
+                  cxx-compiler: clang++
+
+            - name: Build debug version with gcc
+              uses: threeal/cmake-action@v2.0.0
+              with:
+                  build-dir: build-gcc-debug
+                  generator: Ninja
+                  options: CMAKE_BUILD_TYPE=Debug
+                  c-compiler: gcc
+                  cxx-compiler: g++
+
+            - name: Build release version with gcc
+              uses: threeal/cmake-action@v2.0.0
+              with:
+                  build-dir: build-gcc-release
+                  generator: Ninja
+                  options: CMAKE_BUILD_TYPE=Release
+                  c-compiler: gcc
+                  cxx-compiler: g++

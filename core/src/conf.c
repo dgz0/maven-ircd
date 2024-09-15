@@ -47,7 +47,7 @@ static bool to_int(const char *const str, int *const res)
 	return true;
 }
 
-[[nodiscard]] bool
+NODISCARD bool
 irc_conf_listener_add(struct irc_conf *const conf,
 		      const struct irc_conf_listener *const listener,
 		      enum irc_conf_status_code *const code)

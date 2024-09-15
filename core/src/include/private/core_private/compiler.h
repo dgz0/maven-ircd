@@ -41,4 +41,6 @@
 
 #define ATTRIB_FMT(type, idx, first) __attribute__((format(type, idx, first)))
 
+#define NODISCARD __attribute__((warn_unused_result))
+
 // clang-format on

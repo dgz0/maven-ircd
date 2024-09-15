@@ -105,8 +105,7 @@ struct irc_conf {
 /// error condition.
 ///
 /// @returns `true` if no errors were encountered, or `false` otherwise.
-[[nodiscard]] bool
-irc_conf_listener_add(struct irc_conf *conf,
+bool irc_conf_listener_add(struct irc_conf *conf,
 		      const struct irc_conf_listener *listener,
 		      enum irc_conf_status_code *code);
 

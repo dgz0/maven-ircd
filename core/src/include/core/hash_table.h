@@ -29,6 +29,8 @@ extern "C" {
 #include <stddef.h>
 #include "types.h"
 
+#define IRC_SIPHASH_SECRET_KEY_LEN (16)
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpadded"
 
@@ -66,11 +68,15 @@ struct irc_ht {
 
 	/// @brief The number of entries present in the hash table.
 	size_t num_entries;
+
+	u8 secret_key[IRC_SIPHASH_SECRET_KEY_LEN];
 };
 
 void irc_ht_init(struct irc_ht *ht, const struct irc_ht_conf *conf);
 
 void irc_ht_add(struct irc_ht *ht, void *key, void *val);
+
+void *irc_ht_get(struct irc_ht *ht, void *key);
 
 #ifdef __cplusplus
 }

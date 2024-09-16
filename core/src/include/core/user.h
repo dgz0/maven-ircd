@@ -26,11 +26,12 @@
 extern "C" {
 #endif // cplusplus
 
-#include <stdint.h>
+#include <stdbool.h>
 
-typedef unsigned int uint;
-typedef uint32_t u32;
-typedef uint8_t u8;
+struct irc_user {
+	int fd;
+	bool registered;
+};
 
 #ifdef __cplusplus
 }

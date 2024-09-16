@@ -18,8 +18,8 @@
 #include <assert.h>
 #include <stdlib.h>
 
-#include "siphash.h"
 #include "core/compiler.h"
+#include "siphash.h"
 
 /* default: SipHash-2-4 */
 #ifndef cROUNDS

@@ -54,11 +54,36 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "core/hash_table.h"
+#include "core/types.h"
 #include "core/util.h"
 
 #include "siphash.h"
+
+#define SIPHASH_OUT_LEN (8)
+
+static void secret_key_gen(u8 *const buf)
+{
+	assert(buf != NULL);
+
+#ifdef IRC_HAVE_ARC4RANDOM_BUF
+	arc4random_buf(buf, IRC_SIPHASH_SECRET_KEY_LEN);
+#endif
+}
+
+static size_t hash_key(struct irc_ht *const ht, void *key)
+{
+	u8 res[SIPHASH_OUT_LEN] = {};
+
+	siphash(key, 0, ht->secret_key, res, SIPHASH_OUT_LEN);
+
+	size_t val = 0;
+	memcpy(&val, res, SIPHASH_OUT_LEN);
+
+	return val;
+}
 
 void irc_ht_init(struct irc_ht *const ht, const struct irc_ht_conf *const conf)
 {
@@ -73,8 +98,31 @@ void irc_ht_init(struct irc_ht *const ht, const struct irc_ht_conf *const conf)
 	ht->conf = *conf;
 
 	ht->num_entries = 0;
+
+	secret_key_gen(ht->secret_key);
 }
 
 void irc_ht_add(struct irc_ht *const ht, void *const key, void *const val)
 {
+	const size_t hash = hash_key(ht, key) & (ht->capacity - 1);
+
+	if (!ht->entries[hash].key) {
+		ht->entries[hash].key = key;
+		ht->entries[hash].val = val;
+		ht->entries[hash].psl = 0;
+	} else {
+		// Handle collision here.
+		;
+	}
+	ht->num_entries++;
+}
+
+void *irc_ht_get(struct irc_ht *const ht, void *const key)
+{
+	const size_t hash = hash_key(ht, key) & (ht->capacity - 1);
+
+	if (ht->entries[hash].key) {
+		return ht->entries[hash].val;
+	}
+	return NULL;
 }

@@ -28,6 +28,7 @@ extern "C" {
 
 #include "conf.h"
 #include "event.h"
+#include "hash_table.h"
 #include "net.h"
 
 struct irc_ctx {
@@ -35,6 +36,7 @@ struct irc_ctx {
 	struct irc_event event;
 	struct irc_log log;
 	struct irc_net net;
+	struct irc_ht users;
 };
 
 /// @brief Initializes an IRC server context.

@@ -20,6 +20,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+include(CheckSymbolExists)
+
 set(SRCS
 	conf.c
 	ctx.c
@@ -45,11 +47,17 @@ set(HDRS
 	include/core/util.h
 	siphash.h)
 
+check_symbol_exists(arc4random_buf "stdlib.h" HAVE_ARC4RANDOM_BUF)
+
 # Build the core as a static library.
 #
 # NOTE: The core should never be built as a shared library; please don't do
 # this.
 add_library(core STATIC ${SRCS} ${HDRS})
+
+if (HAVE_ARC4RANDOM_BUF)
+	target_compile_definitions(core PRIVATE -DIRC_HAVE_ARC4RANDOM_BUF)
+endif()
 
 # Expose the public header files to targets that link to us.
 target_include_directories(core PUBLIC include)

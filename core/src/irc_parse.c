@@ -21,7 +21,7 @@
 // SOFTWARE.
 
 #include <string.h>
-#include "core_private/irc_parse.h"
+#include "core/irc_parse.h"
 
 static void process_cmd(const char *const str, ptrdiff_t len,
 			struct irc_msg *const msg)

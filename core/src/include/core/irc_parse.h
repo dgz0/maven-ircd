@@ -33,6 +33,9 @@
 
 // clang-format on
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpadded"
+
 struct irc_param {
 	char entry[IRC_MSG_PARAM_LEN_MAX + 1];
 	size_t entry_len;
@@ -44,6 +47,8 @@ struct irc_msg {
 	size_t num_params;
 	size_t cmd_len;
 };
+
+#pragma GCC diagnostic pop
 
 void irc_msg_parse(const char *const str, const size_t str_len,
 		   struct irc_msg *msg);

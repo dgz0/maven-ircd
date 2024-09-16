@@ -24,10 +24,9 @@
 #include <string.h>
 #include <sys/epoll.h>
 
-#include "core_private/compiler.h"
-#include "core_private/log.h"
-#include "core_private/net_platform.h"
-#include "core_private/net.h"
+#include "core/compiler.h"
+#include "core/log.h"
+#include "core/net.h"
 
 #define MAX_EVENTS (32)
 
@@ -39,9 +38,9 @@ static void process_fd(struct irc_net *const net, const int idx,
 {
 	if (ev[idx].data.fd == listen_sock) {
 		// New connection from client.
-		net_accept(net, listen_sock);
+		irc_net_accept(net, listen_sock);
 	} else if (ev[idx].events & EPOLLIN) {
-		net_read(net, ev[idx].data.fd);
+		irc_net_read(net, ev[idx].data.fd);
 	}
 }
 
@@ -52,42 +51,43 @@ static bool fd_add(struct irc_net *const net, const int fd, const u32 flags)
 	ev_data.events = flags;
 	ev_data.data.fd = fd;
 
-	if (unlikely(epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &ev_data) < 0)) {
-		LOG_ERR(net->log, "epoll_ctl() failed: %s", strerror(errno));
+	if (IRC_UNLIKELY(epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &ev_data) < 0)) {
+		IRC_LOG_ERR(net->log, "epoll_ctl() failed: %s",
+			    strerror(errno));
 		return false;
 	}
-	LOG_TRACE(net->log, "epoll_ctl() success");
+	IRC_LOG_TRACE(net->log, "epoll_ctl() success");
 	return true;
 }
 
-bool net_platform_init(struct irc_net *const net)
+bool irc_net_platform_init(struct irc_net *const net)
 {
 	epfd = epoll_create1(0);
 
-	if (unlikely(epfd < 0)) {
-		LOG_ERR(net->log, "net: epoll_create1() failed: %s",
-			strerror(errno));
+	if (IRC_UNLIKELY(epfd < 0)) {
+		IRC_LOG_ERR(net->log, "net: epoll_create1() failed: %s",
+			    strerror(errno));
 		return false;
 	}
-	LOG_TRACE(net->log, "net: epoll_create1() success");
+	IRC_LOG_TRACE(net->log, "net: epoll_create1() success");
 	return true;
 }
 
-bool net_platform_client_add(struct irc_net *const net, const int fd)
+bool irc_net_platform_client_add(struct irc_net *const net, const int fd)
 {
 	return fd_add(net, fd, EPOLLIN | EPOLLET);
 }
 
-bool net_platform_listener_add(struct irc_net *const net, const int fd)
+bool irc_net_platform_listener_add(struct irc_net *const net, const int fd)
 {
 	return fd_add(net, fd, EPOLLIN | EPOLLOUT | EPOLLET);
 }
 
-void net_platform_poll(struct irc_net *const net)
+void irc_net_platform_poll(struct irc_net *const net)
 {
 	const int num_fds = epoll_wait(epfd, ev, MAX_EVENTS, -1);
 
-	if (unlikely(num_fds < 0)) {
+	if (IRC_UNLIKELY(num_fds < 0)) {
 		// error
 	}
 

@@ -23,7 +23,14 @@
 #include <setjmp.h>
 #include <stdarg.h>
 #include <stddef.h>
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpadded"
+
 #include "cmocka.h"
+
+#pragma GCC diagnostic pop
+
 #include "core/conf.h"
 
 static void accept_normal_port_num(void **state)

@@ -20,9 +20,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-/// @file hash_table.h Provides the public interface for the hash table
-/// implementation.
-
 #pragma once
 
 #ifdef __cplusplus
@@ -30,33 +27,61 @@ extern "C" {
 #endif // __cplusplus
 
 #include <stddef.h>
-#include "types.h"
 
-struct ht_entry {
-	/// @brief The key associated with this entry.
-	void *key;
+// clang-format off
 
-	/// @brief The value associated with the key.
-	void *val;
+#define IRC_EVENT_NUM_MAX       (256)
+#define IRC_EVENT_SUB_NUM_MAX   (32)
 
-	/// @brief The number of probes required to find this key during lookup.
-	uint psl;
+// clang-format on
+
+typedef void (*irc_event_cb)(void *const, void *const);
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpadded"
+
+struct irc_event_net_data_recv {
+	const char *data;
+	size_t size;
+	int fd;
 };
 
-struct ht_conf {
-	/// @brief The function to call to generate a hash value for a key.
-	///
-	/// @param key The key to generate a hash value from.
-	/// @returns The hash value for the key.
-	size_t (*hash_cb)(const void *key);
+#pragma GCC diagnostic pop
 
-	/// @brief The initial capacity of the hash table.
-	/// This must be a power of two.
-	size_t initial_capacity;
-
-	/// @brief The maximum load factor, in percent.
-	uint load_fact_max;
+struct irc_event_net_client_conn {
+	int fd;
 };
+
+enum irc_event_type {
+	// clang-format off
+
+        /// @brief Data has been received over the network.
+        IRC_EVENT_TYPE_NET_DATA_RECV    = 0,
+
+	/// @brief A connection to the server has been established.
+        IRC_EVENT_TYPE_NET_CLIENT_CONN  = 1,
+
+	// clang-format on
+};
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpadded"
+
+struct irc_event_data {
+	irc_event_cb sub_cb[IRC_EVENT_SUB_NUM_MAX];
+	size_t num_subs;
+};
+
+#pragma GCC diagnostic pop
+
+struct irc_event {
+	struct irc_event_data event_list[IRC_EVENT_NUM_MAX];
+	void *ctx;
+};
+
+void irc_event_pub(struct irc_event *ev, enum irc_event_type type, void *ptr);
+void irc_event_sub(struct irc_event *ev, enum irc_event_type type,
+		   irc_event_cb cb);
 
 #ifdef __cplusplus
 }

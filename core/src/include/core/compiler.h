@@ -25,22 +25,36 @@
 
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif // cplusplus
+
 // clang-format off
 
 /// @brief This branch is unlikely to be executed.
 ///
 /// Improves compiler optimization decisions; ignored when profile-guided
 /// optimization is used.
-#define unlikely(x)	__builtin_expect(!!(x), 0)
+#define IRC_UNLIKELY(x) __builtin_expect(!!(x), 0)
 
 /// @brief This branch is likely to be executed.
 ///
 /// Improves compiler optimization decisions; ignored when profile-guided
 /// optimization is used.
-#define likely(x)	__builtin_expect(!!(x), 1)
+#define IRC_LIKELY(x)   __builtin_expect(!!(x), 1)
 
-#define ATTRIB_FMT(type, idx, first) __attribute__((format(type, idx, first)))
+#define IRC_ATTRIB_FMT(type, idx, first) \
+        __attribute__((format(type, idx, first)))
 
-#define NODISCARD __attribute__((warn_unused_result))
+/// @brief The return value of this function should not be discarded.
+#define IRC_NODISCARD   __attribute__((warn_unused_result))
+
+#define IRC_NORETURN    __attribute__((noreturn))
+
+#define IRC_FALLTHROUGH __attribute__((fallthrough))
 
 // clang-format on
+
+#ifdef __cplusplus
+}
+#endif // cplusplus

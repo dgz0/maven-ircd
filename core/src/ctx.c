@@ -20,12 +20,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "core_private/irc_parse.h"
-#include "core_private/log.h"
-#include "core_private/net.h"
-#include "core_private/net_platform.h"
-
 #include "core/ctx.h"
+#include "core/irc_parse.h"
+#include "core/log.h"
+#include "core/net.h"
 
 static void net_client_recv(void *const ctx, void *const ev_data)
 {
@@ -44,10 +42,10 @@ static void net_client_conn(void *const ctx, void *const ev_data)
 	struct irc_event_net_client_conn *ev =
 		(struct irc_event_net_client_conn *)ev_data;
 
-	LOG_INFO(&m_ctx->log, "client connected");
+	IRC_LOG_INFO(&m_ctx->log, "client connected");
 }
 
-void irc_init(struct irc_ctx *const ctx)
+static void setup_ctx_ptrs(struct irc_ctx *const ctx)
 {
 	ctx->event.ctx = ctx;
 
@@ -56,21 +54,30 @@ void irc_init(struct irc_ctx *const ctx)
 	ctx->net.event = &ctx->event;
 
 	ctx->conf.log = &ctx->log;
-
-	LOG_INFO(&ctx->log, "initialized");
 }
 
-void irc_io_loop(struct irc_ctx *const ctx)
+static void hook_events(struct irc_ctx *const ctx)
 {
 	irc_event_sub(&ctx->event, IRC_EVENT_TYPE_NET_CLIENT_CONN,
 		      &net_client_conn);
 
 	irc_event_sub(&ctx->event, IRC_EVENT_TYPE_NET_DATA_RECV,
 		      &net_client_recv);
+}
 
-	net_init(&ctx->net);
+void irc_init(struct irc_ctx *const ctx)
+{
+	setup_ctx_ptrs(ctx);
+	hook_events(ctx);
+
+	IRC_LOG_INFO(&ctx->log, "initialized");
+}
+
+IRC_NORETURN void irc_io_loop(struct irc_ctx *const ctx)
+{
+	irc_net_init(&ctx->net);
 
 	for (;;) {
-		net_platform_poll(&ctx->net);
+		irc_net_platform_poll(&ctx->net);
 	}
 }

@@ -20,7 +20,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "core/event.h"
 #include <errno.h>
 #include <fcntl.h>
 #include <netdb.h>
@@ -28,12 +27,12 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-#include "core_private/compiler.h"
-#include "core_private/log.h"
-#include "core_private/net_platform.h"
-#include "core_private/net.h"
+#include "core/compiler.h"
+#include "core/event.h"
+#include "core/log.h"
+#include "core/net.h"
 
-void net_read(struct irc_net *const net, const int fd)
+void irc_net_read(struct irc_net *const net, const int fd)
 {
 	char buf[512];
 
@@ -74,15 +73,17 @@ static void listener_setup(struct irc_net *const net)
 		const char *host = net->conf->listeners.entries[i].host;
 		const char *port = net->conf->listeners.entries[i].port;
 
-		net_listen(net, host, port);
+		irc_net_listen(net, host, port);
 	}
 }
 
-bool net_listen(struct irc_net *const net, const char *const host,
-		const char *const port)
+bool irc_net_listen(struct irc_net *const net, const char *const host,
+		    const char *const port)
 {
-	if (unlikely(net->listeners.num_entries >= IRC_CONF_LISTENER_NUM_MAX)) {
-		LOG_ERR(net->log, "platform_net_listen(): too many listeners");
+	if (IRC_UNLIKELY(net->listeners.num_entries >=
+			 IRC_CONF_LISTENER_NUM_MAX)) {
+		IRC_LOG_ERR(net->log,
+			    "platform_net_listen(): too many listeners");
 		return false;
 	}
 
@@ -102,9 +103,9 @@ bool net_listen(struct irc_net *const net, const char *const host,
 	struct addrinfo *res = NULL;
 	struct addrinfo *rp = NULL;
 
-	if (unlikely(getaddrinfo(host, port, &hints, &res) != 0)) {
-		LOG_ERR(net->log,
-			"platform_net_listen(): getaddrinfo() failed");
+	if (IRC_UNLIKELY(getaddrinfo(host, port, &hints, &res) != 0)) {
+		IRC_LOG_ERR(net->log,
+			    "platform_net_listen(): getaddrinfo() failed");
 
 		return false;
 	}
@@ -114,7 +115,7 @@ bool net_listen(struct irc_net *const net, const char *const host,
 	for (rp = res; rp; rp = rp->ai_next) {
 		fd = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
 
-		if (unlikely(fd < 0)) {
+		if (IRC_UNLIKELY(fd < 0)) {
 			// Whatever this is, we can't make a socket for it.
 			// Don't panic yet; just try the next entry.
 			continue;
@@ -128,68 +129,58 @@ bool net_listen(struct irc_net *const net, const char *const host,
 		// address. When the listening socket is bound to INADDR_ANY
 		// with a specific port then it is not possible to bind to this
 		// port for any local address.
-		if (unlikely(setsockopt(fd, SOL_SOCKET, SO_REUSEADDR,
-					&(uint){ 1 }, sizeof(uint)) < 0)) {
+		if (IRC_UNLIKELY(setsockopt(fd, SOL_SOCKET, SO_REUSEADDR,
+					    &(uint){ 1 }, sizeof(uint)) < 0)) {
 			return false;
 		}
 
-		if (likely(bind(fd, rp->ai_addr, rp->ai_addrlen) == 0)) {
+		if (IRC_LIKELY(bind(fd, rp->ai_addr, rp->ai_addrlen) == 0)) {
 			break;
 		}
 
-		if (unlikely(!close(fd))) {
+		if (IRC_UNLIKELY(!close(fd))) {
 			return false;
 		}
 	}
 
-	if (unlikely(listen(fd, SOMAXCONN) < 0)) {
+	if (IRC_UNLIKELY(listen(fd, SOMAXCONN) < 0)) {
 		return false;
 	}
 
-	if (!net_platform_listener_add(net, fd)) {
+	if (!irc_net_platform_listener_add(net, fd)) {
 		return false;
 	}
 
 	net->listeners.entries[net->listeners.num_entries++] = fd;
 
-	LOG_INFO(net->log, "listening for incoming client connections on %s:%s",
-		 host, port);
+	IRC_LOG_INFO(net->log,
+		     "listening for incoming client connections on %s:%s", host,
+		     port);
 
 	return true;
 }
 
-void net_accept(struct irc_net *const net, const int fd)
+void irc_net_accept(struct irc_net *const net, const int fd)
 {
 	struct sockaddr user_in;
 	socklen_t socklen;
 
-	char hbuf[NI_MAXHOST];
-	char sbuf[NI_MAXSERV];
-
 	const int user_sock = accept(fd, &user_in, &socklen);
 
-	if (unlikely(user_sock < 0)) {
-		LOG_ERR(net->log, "unable to accept connection: %s",
-			strerror(errno));
+	if (IRC_UNLIKELY(user_sock < 0)) {
+		IRC_LOG_ERR(net->log, "unable to accept connection: %s",
+			    strerror(errno));
 		return;
 	}
 	set_sock_nonblock(fd);
-	net_platform_client_add(net, user_sock);
+	irc_net_platform_client_add(net, user_sock);
 
 	struct irc_event_net_client_conn ev = { .fd = user_sock };
 	irc_event_pub(net->event, IRC_EVENT_TYPE_NET_CLIENT_CONN, &ev);
-
-#if 0
-	int sock = getnameinfo(&user_in, socklen, hbuf, sizeof(hbuf), sbuf,
-			       sizeof(sbuf), NI_NUMERICHOST | NI_NUMERICSERV);
-
-	if (sock == 0) {
-	}
-#endif
 }
 
-void net_init(struct irc_net *const net)
+void irc_net_init(struct irc_net *const net)
 {
-	net_platform_init(net);
+	irc_net_platform_init(net);
 	listener_setup(net);
 }

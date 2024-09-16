@@ -22,28 +22,71 @@
 
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 #include "compiler.h"
-#include "core/log.h"
+#include "types.h"
 
-void log_dispatch(struct irc_log *log, uint lvl, const char *msg, ...)
-	ATTRIB_FMT(printf, 3, 4);
+enum irc_log_lvl {
+	// clang-format off
 
-#define LOG_MSG(logger, level, args...)                          \
+	IRC_LOG_LVL_INFO	= 1,
+	IRC_LOG_LVL_WARN	= 2,
+	IRC_LOG_LVL_ERR		= 3,
+	IRC_LOG_LVL_DBG		= 4,
+	IRC_LOG_LVL_TRACE	= 5,
+	IRC_LOG_LVL_FATAL	= 6
+
+	// clang-format on
+};
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpadded"
+
+struct irc_log {
+	void *udata;
+	void (*cb)(void *udata, const uint lvl, char *str);
+	uint lvl;
+};
+
+#pragma GCC diagnostic pop
+
+void irc_log_dispatch(struct irc_log *log, uint lvl, const char *msg, ...)
+	IRC_ATTRIB_FMT(printf, 3, 4);
+
+#define IRC_LOG_MSG(logger, level, args...)                      \
 	({                                                       \
 		struct irc_log *log = (logger);                  \
                                                                  \
 		if ((log) && (log->lvl >= (level)) && log->cb) { \
-			log_dispatch(log, (level), args);        \
+			irc_log_dispatch(log, (level), args);    \
 		}                                                \
 	})
 
 // clang-format off
 
-#define LOG_INFO(log, args...)	(LOG_MSG((log), IRC_LOG_LVL_INFO, args))
-#define LOG_WARN(log, args...)	(LOG_MSG((log), IRC_LOG_LVL_WARN, args))
-#define LOG_ERR(log, args...)	(LOG_MSG((log), IRC_LOG_LVL_ERR, args))
-#define LOG_FATAL(log, args...)	(LOG_MSG((log), IRC_LOG_LVL_FATAL, args))
-#define LOG_DBG(log, args...)	(LOG_MSG((log), IRC_LOG_LVL_DBG, args))
-#define LOG_TRACE(log, args...)	(LOG_MSG((log), IRC_LOG_LVL_TRACE, args))
+#define IRC_LOG_INFO(log, args...) \
+	(IRC_LOG_MSG((log), IRC_LOG_LVL_INFO, args))
+
+#define IRC_LOG_WARN(log, args...) \
+	(IRC_LOG_MSG((log), IRC_LOG_LVL_WARN, args))
+
+#define IRC_LOG_ERR(log, args...) \
+	(IRC_LOG_MSG((log), IRC_LOG_LVL_ERR, args))
+
+#define IRC_LOG_FATAL(log, args...) \
+	(IRC_LOG_MSG((log), IRC_LOG_LVL_FATAL, args))
+
+#define IRC_LOG_DBG(log, args...) \
+	(IRC_LOG_MSG((log), IRC_LOG_LVL_DBG, args))
+
+#define IRC_LOG_TRACE(log, args...) \
+	(IRC_LOG_MSG((log), IRC_LOG_LVL_TRACE, args))
 
 // clang-format on
+
+#ifdef __cplusplus
+}
+#endif // __cplusplus

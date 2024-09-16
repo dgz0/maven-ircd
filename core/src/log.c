@@ -25,15 +25,17 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
-#include "core_private/log.h"
 
-ATTRIB_FMT(printf, 3, 4)
-void log_dispatch(struct irc_log *const log, const uint lvl,
-		  const char *const msg, ...)
+#include "core/log.h"
+
+IRC_ATTRIB_FMT(printf, 3, 4)
+void irc_log_dispatch(struct irc_log *const log, const uint lvl,
+		      const char *const msg, ...)
 {
 #define LVL_DEF(str) { str, sizeof(str) }
 
 	// clang-format off
+
 	static const struct {
 		const char *const str;
 		const size_t len;
@@ -44,9 +46,8 @@ void log_dispatch(struct irc_log *const log, const uint lvl,
 		[IRC_LOG_LVL_DBG]       = LVL_DEF("[debug] "),
                 [IRC_LOG_LVL_TRACE]     = LVL_DEF("[trace] ")
 	};
-	// clang-format on
 
-#undef LVL_DEF
+	// clang-format on
 
 	char str[LOG_MSG_MAX];
 	memcpy(str, lvl_data[lvl].str, lvl_data[lvl].len);

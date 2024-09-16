@@ -20,32 +20,61 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-/// @file net_platform.h Defines the interface for platform specific network
-/// functions. This is only useful for multiplexers (e.g., epoll()).
-
 #pragma once
 
-#include "core/net.h"
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
+#include "conf.h"
+#include "event.h"
+#include "log.h"
+
+struct irc_net {
+	struct {
+		int entries[IRC_CONF_LISTENER_NUM_MAX];
+		size_t num_entries;
+	} listeners;
+
+	struct irc_conf *conf;
+	struct irc_log *log;
+	struct irc_event *event;
+};
+
+/// @brief Initializes the network module.
+/// @param net The network instance to initialize.
+void irc_net_init(struct irc_net *net);
 
 /// @brief Initializes the platform specific multiplexer.
 /// @param net The network instance associated with the multiplexer.
 /// @returns `false` if an error was encountered, or `true` otherwise.
-bool net_platform_init(struct irc_net *net);
+bool irc_net_platform_init(struct irc_net *net);
 
 /// @brief Adds a listener for incoming client connections to the multiplexer.
 /// @param net The network instance associated with the multiplexer.
 /// @param fd The file descriptor associated with the listener.
 /// @returns `false` if an error was encountered, or `true` otherwise.
-bool net_platform_listener_add(struct irc_net *net, int fd);
+bool irc_net_platform_listener_add(struct irc_net *net, int fd);
 
 /// @brief Adds a client connection to the multiplexer.
 /// @param net The network instance associated with the multiplexer.
 /// @param fd The file descriptor associated with the client connection.
 /// @returns `false` if an error was encountered, or `true` otherwise.
-bool net_platform_client_add(struct irc_net *net, int fd);
+bool irc_net_platform_client_add(struct irc_net *net, int fd);
 
 /// @brief Invoke the multiplexer to poll for changes in file descriptors of
 /// interest.
 ///
 /// @param net The network instance associated with the multiplexer.
-void net_platform_poll(struct irc_net *net);
+void irc_net_platform_poll(struct irc_net *net);
+
+void irc_net_accept(struct irc_net *net, const int fd);
+
+void irc_net_read(struct irc_net *const net, const int fd);
+
+bool irc_net_listen(struct irc_net *const net, const char *host,
+		    const char *port);
+
+#ifdef __cplusplus
+}
+#endif // __cplusplus

@@ -22,11 +22,11 @@
 
 #include <ctype.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
-#include "core_private/compiler.h"
-#include "core_private/log.h"
-
+#include "core/compiler.h"
 #include "core/conf.h"
+#include "core/log.h"
 
 // clang-format off
 
@@ -47,18 +47,18 @@ static bool to_int(const char *const str, int *const res)
 	return true;
 }
 
-NODISCARD bool
+IRC_NODISCARD bool
 irc_conf_listener_add(struct irc_conf *const conf,
 		      const struct irc_conf_listener *const listener,
 		      enum irc_conf_status_code *const code)
 {
-	if (unlikely(conf->listeners.num_entries >=
-		     IRC_CONF_LISTENER_NUM_MAX)) {
-		LOG_ERR(conf->log,
-			"unable to add \"%s:%s\" as a listener - too many "
-			"listeners (max %d)",
-			listener->host, listener->port,
-			IRC_CONF_LISTENER_NUM_MAX);
+	if (IRC_UNLIKELY(conf->listeners.num_entries >=
+			 IRC_CONF_LISTENER_NUM_MAX)) {
+		IRC_LOG_ERR(conf->log,
+			    "unable to add \"%s:%s\" as a listener - too many "
+			    "listeners (max %d)",
+			    listener->host, listener->port,
+			    IRC_CONF_LISTENER_NUM_MAX);
 
 		*code = IRC_CONF_TOO_MANY_LISTENERS;
 		return false;
@@ -67,10 +67,11 @@ irc_conf_listener_add(struct irc_conf *const conf,
 	int port = 0;
 	const bool port_conv_good = to_int(listener->port, &port);
 
-	if (unlikely(((port < LISTENER_PORT_MIN) ||
-		      (port > LISTENER_PORT_MAX)) ||
-		     !port_conv_good)) {
-		LOG_ERR(conf->log,
+	if (IRC_UNLIKELY(((port < LISTENER_PORT_MIN) ||
+			  (port > LISTENER_PORT_MAX)) ||
+			 !port_conv_good)) {
+		IRC_LOG_ERR(
+			conf->log,
 			"unable to add \"%s:%s\" as a listener - port not "
 			"valid, valid values are integers between %d and %d",
 			listener->host, listener->port, LISTENER_PORT_MIN,
@@ -82,8 +83,8 @@ irc_conf_listener_add(struct irc_conf *const conf,
 
 	conf->listeners.entries[conf->listeners.num_entries++] = *listener;
 
-	LOG_INFO(conf->log, "added \"%s:%s\" as a listener", listener->host,
-		 listener->port);
+	IRC_LOG_INFO(conf->log, "added \"%s:%s\" as a listener", listener->host,
+		     listener->port);
 
 	*code = IRC_CONF_STATUS_OK;
 	return true;

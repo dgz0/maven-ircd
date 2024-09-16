@@ -20,27 +20,27 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#pragma once
+#include <stdlib.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif // __cplusplus
+#include "core/compiler.h"
+#include "core/util.h"
 
-#include "event.h"
-#include "conf.h"
-#include "log.h"
+void *irc_malloc(const size_t size)
+{
+	void *ptr = malloc(size);
 
-struct irc_net {
-	struct {
-		int entries[IRC_CONF_LISTENER_NUM_MAX];
-		size_t num_entries;
-	} listeners;
-
-	struct irc_conf *conf;
-	struct irc_log *log;
-	struct irc_event *event;
-};
-
-#ifdef __cplusplus
+	if (IRC_UNLIKELY(!ptr)) {
+		abort();
+	}
+	return ptr;
 }
-#endif // __cplusplus
+
+void *irc_calloc(const size_t nmemb, const size_t size)
+{
+	void *ptr = calloc(nmemb, size);
+
+	if (IRC_UNLIKELY(!ptr)) {
+		abort();
+	}
+	return ptr;
+}

@@ -26,8 +26,15 @@
 #include <stdarg.h>
 #include <stddef.h>
 #include <string.h>
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpadded"
+
 #include "cmocka.h"
-#include "core_private/irc_parse.h"
+
+#pragma GCC diagnostic pop
+
+#include "core/irc_parse.h"
 
 #define PARSE_CALL(x, m) irc_msg_parse((x), sizeof((x)) - 1, m)
 
@@ -166,6 +173,8 @@ static void truncate_cmd(void **state)
 
 static void truncate_param(void **state)
 {
+	(void)state;
+
 	struct irc_msg msg = {};
 
 	PARSE_CALL(
@@ -231,6 +240,8 @@ static void truncate_param(void **state)
 
 static void truncate_params(void **state)
 {
+	(void)state;
+
 	struct irc_msg msg = {};
 
 	PARSE_CALL(

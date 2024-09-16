@@ -20,4 +20,61 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+/// @file hash_table.c Defines the implementation of the hash table.
+///
+/// * This implementation uses the the robin hood hashing technique, which is
+///   based on open addressing. No linked lists or additional pointers are used,
+///   improving cache performance and lowering memory requirements.
+///
+/// * Linear probing is used due to the innate resistance to clustering the
+///   robin hood technique offers, which further improves cache performance.
+///
+/// * The initial capacity must always be a power of two. When or if the hash
+///   table needs to resize, the hash table will be resized by the next power of
+///   two to reduce collisions.
+///
+///   Insertion example: assume that the hash table was initialized with an
+///   initial capacity of 2,048 elements, and the resize threshold is set to
+///   ~75%. If the number of entries in the hash table is 1,535 (~75% of 2,048),
+///   then on the next insertion, the hash table will be resized to a capacity
+///   of 4,096 (2,048 * 2) and the hash table will contain 1,536 elements.
+///
+///   Removals do not shrink the hash table size; this might be something to
+///   look at in the future.
+///
+/// * The underlying data associated with the keys and values is unknown to us.
+///   This is particularly important when the hash table is being destroyed; you
+///   are responsible for freeing any memory associated with the keys or values
+///   of each entry before destroying the hash table, if necessary.
+///
+/// * SipHash 2-4 is used as the hash function. The secret key is generated when
+///   the hash table is initialized using a CSPRNG.
+
+#include <assert.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "core/hash_table.h"
+#include "core/util.h"
+
+#include "siphash.h"
+
+void irc_ht_init(struct irc_ht *const ht, const struct irc_ht_conf *const conf)
+{
+	assert(ht != NULL);
+	assert(conf != NULL);
+	assert(IRC_IS_POW2(conf->initial_capacity));
+
+	ht->entries =
+		irc_calloc(conf->initial_capacity, sizeof(struct irc_ht_entry));
+
+	ht->capacity = conf->initial_capacity;
+	ht->conf = *conf;
+
+	ht->num_entries = 0;
+}
+
+void irc_ht_add(struct irc_ht *const ht, void *const key, void *const val)
+{
+}

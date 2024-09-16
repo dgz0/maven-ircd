@@ -27,60 +27,50 @@ extern "C" {
 #endif // __cplusplus
 
 #include <stddef.h>
-
-// clang-format off
-
-#define IRC_EVENT_NUM_MAX       (256)
-#define IRC_EVENT_SUB_NUM_MAX   (32)
-
-// clang-format on
-
-typedef void (*irc_event_cb)(void *const, void *const);
+#include "types.h"
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpadded"
 
-struct irc_event_net_data_recv {
-	const char *data;
-	size_t size;
-	int fd;
+struct irc_ht_entry {
+	/// @brief The key associated with this entry.
+	void *key;
+
+	/// @brief The value associated with the key.
+	void *val;
+
+	/// @brief The number of probes required to find this key during lookup.
+	uint psl;
+};
+
+struct irc_ht_conf {
+	/// @brief The initial capacity of the hash table.
+	/// This must be a power of two.
+	size_t initial_capacity;
+
+	/// @brief The maximum load factor, in percent.
+	uint load_fact_max;
 };
 
 #pragma GCC diagnostic pop
 
-struct irc_event_net_client_conn {
-	int fd;
+struct irc_ht {
+	/// @brief The configuration parameters of the hash table.
+	struct irc_ht_conf conf;
+
+	/// @brief The list of entries within the hash table.
+	struct irc_ht_entry *entries;
+
+	/// @brief The maximum number of entries in the hash table allowed.
+	size_t capacity;
+
+	/// @brief The number of entries present in the hash table.
+	size_t num_entries;
 };
 
-enum irc_event_type {
-	// clang-format off
+void irc_ht_init(struct irc_ht *ht, const struct irc_ht_conf *conf);
 
-        /// @brief Data has been received over the network.
-        IRC_EVENT_TYPE_NET_DATA_RECV    = 0,
-
-        IRC_EVENT_TYPE_NET_CLIENT_CONN  = 1,
-
-	// clang-format on
-};
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpadded"
-
-struct irc_event_data {
-	irc_event_cb sub_cb[IRC_EVENT_SUB_NUM_MAX];
-	size_t num_subs;
-};
-
-#pragma GCC diagnostic pop
-
-struct irc_event {
-	struct irc_event_data event_list[IRC_EVENT_NUM_MAX];
-	void *ctx;
-};
-
-void irc_event_pub(struct irc_event *ev, enum irc_event_type type, void *ptr);
-void irc_event_sub(struct irc_event *ev, enum irc_event_type type,
-		   irc_event_cb cb);
+void irc_ht_add(struct irc_ht *ht, void *key, void *val);
 
 #ifdef __cplusplus
 }

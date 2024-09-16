@@ -26,27 +26,31 @@
 extern "C" {
 #endif // cplusplus
 
-#include "types.h"
+#include <stddef.h>
 
-enum irc_log_lvl {
-	IRC_LOG_LVL_INFO = 1,
-	IRC_LOG_LVL_WARN = 2,
-	IRC_LOG_LVL_ERR = 3,
-	IRC_LOG_LVL_DBG = 4,
-	IRC_LOG_LVL_TRACE = 5,
-	IRC_LOG_LVL_FATAL = 6
-};
+/// @brief Swaps two variables.
+///
+/// @param x The first variable to swap.
+/// @param y The second variable to swap.
+#define IRC_SWAP(x, y)                  \
+	({                              \
+		typeof(x) x_ = (x);     \
+		typeof(y) y_ = (y);     \
+                                        \
+		typeof(x) temp_ = (x_); \
+		x_ = y_;                \
+		y_ = temp_;             \
+	})
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpadded"
+/// @brief Checks to see if the given integer is a power of two.
+///
+/// 0 is not considered a power of two.
+///
+/// @param x The integer to check.
+#define IRC_IS_POW2(x) ((x) && !((x) & ((x) - 1)))
 
-struct irc_log {
-	void *udata;
-	void (*cb)(void *udata, const uint lvl, char *str);
-	uint lvl;
-};
-
-#pragma GCC diagnostic pop
+void *irc_malloc(size_t size);
+void *irc_calloc(size_t nmemb, size_t size);
 
 #ifdef __cplusplus
 }

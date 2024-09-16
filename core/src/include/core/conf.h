@@ -106,8 +106,8 @@ struct irc_conf {
 ///
 /// @returns `true` if no errors were encountered, or `false` otherwise.
 bool irc_conf_listener_add(struct irc_conf *conf,
-		      const struct irc_conf_listener *listener,
-		      enum irc_conf_status_code *code);
+			   const struct irc_conf_listener *listener,
+			   enum irc_conf_status_code *code);
 
 #ifdef __cplusplus
 }

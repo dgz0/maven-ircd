@@ -29,7 +29,7 @@
 
 #define IRC_MSG_CMD_LEN_MAX	(16)
 #define IRC_MSG_PARAM_LEN_MAX	(256)
-#define IRC_MSG_PARAM_NUM_MAX	(10)
+#define IRC_MSG_PARAM_NUM_MAX	(8)
 
 // clang-format on
 
